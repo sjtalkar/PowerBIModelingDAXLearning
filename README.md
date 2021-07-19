@@ -31,5 +31,48 @@
 
 ` IF ( ISSELECTED([Calc Group Measure Qty], [Sales Qty], SELECTEDMEASURE())`
  
+ ### Tabular Editor's Expression Editor
+ 
+ - In the Expression Editor in Tabular Editor, in the Property dropdown list, you can select Format String Expression
+ 
+ `IF (
+      ISSELECTEDMEASURE( [Calc Group Measure Amount] ),
+      "\$#,0.00;,(\$3,0.00);\$#,0.00",
+      SELECTEDMEASUREORMATSTRING()
+      )
+      
+   `
+  
+  - If you do not want labels, use UNICHAR(8203)
+
+ `IF (
+      ISSELECTEDMEASURE( [Calc Group Measure Amount] )
+       && SELECTEDVALUE('Data Labels'[Data Labels] ) = "No Bar Labels",
+       
+       UNICHAR(8203),
+      
+      IF (
+      ISSELECTEDMEASURE( [Calc Group Measure Amount] ),
+      "\$#,0.00;,(\$3,0.00);\$#,0.00",
+      SELECTEDMEASUREORMATSTRING()
+      )
+   )
+  `
+  
+  ### The option to Blank out the measure - Create a Calculated Item called Blank with the Property Expression as:
+  `IF (
+      ISSELECTEDMEASURE([]),
+      BLANK(),
+      SELECTEDMEASURE()
+      )
+      
+      
+ ### Create a Selector with the Calculated Group's Name/Formula
+  
+   `
+
+
+   
+ 
  
  
