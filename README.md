@@ -1,5 +1,10 @@
 # PowerBI  Calculation Groups
 
+[Video with Marco Russo](https://www.youtube.com/watch?v=a4zYT-N-zsU&t=623s)
+[Video with Kane Snyder](https://www.youtube.com/watch?v=IH4bcHhxunw)
+Definitive Guide to DAX Second Edition
+
+
 > Requirements - Tabular Editor to create and maintain
 
 > Calculation groups can apply **specific calculations** on top of **existing DAX measures**. 
@@ -35,17 +40,17 @@
  
  - In the Expression Editor in Tabular Editor, in the Property dropdown list, you can select Format String Expression
  
- `IF (
+ ```IF (
       ISSELECTEDMEASURE( [Calc Group Measure Amount] ),
       "\$#,0.00;,(\$3,0.00);\$#,0.00",
       SELECTEDMEASUREORMATSTRING()
       )
       
-   `
+   ```
   
   - If you do not want labels, use UNICHAR(8203)
 
- `IF (
+ ```IF (
       ISSELECTEDMEASURE( [Calc Group Measure Amount] )
        && SELECTEDVALUE('Data Labels'[Data Labels] ) = "No Bar Labels",
        
@@ -57,19 +62,19 @@
       SELECTEDMEASUREORMATSTRING()
       )
    )
-  `
+  ```
   
   ### The option to Blank out the measure - Create a Calculated Item called Blank with the Property Expression as:
-  `IF (
+  ```IF (
       ISSELECTEDMEASURE([]),
       BLANK(),
       SELECTEDMEASURE()
       )
-      
+     ``` 
       
  ### Create a Selector with the Calculated Group's Name/Formula
   
-   `
+
 
 
    
