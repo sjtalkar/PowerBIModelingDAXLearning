@@ -109,10 +109,14 @@ Definitive Guide to DAX Second Edition
 3. The sort order of the calculation item is defined by the Ordinal value. This property defines how the different calculation items are sorted when presented to the user. It is very similar to the sort-by-column feature of the data model. This feature is not available as of April 2019 but should be implemented before calculation groups are released.
 4. **Format String.** If not specified, a calculation item inherits the format string of its base measure. Nevertheless, if the modifier changes the calculation, then it is possible to override the measure format string with the format of the calculation item.
 
+## Isolating a Calculation Item
 
+If the Calculated Item is called YTD:
 
+```CALCULATE (    [Sales Amount],    'Time Intelligence'[Time calc] = "YTD")```
 
-
+## Precedence Property
+> The Precedence property is an integer value assigned to a calculation group. A higher value means a higher precedence of application; the calculation group with the higher precedence is applied first. In other words, DAX applies the calculation groups according to their Precedence value sorted in a descending order. The absolute value assigned to Precedence does not mean anything. What matters is how it compares with the Precedence of other calculation groups. There cannot be two calculation groups in a model with the same Precedence.
 
 
 
