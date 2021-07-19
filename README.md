@@ -150,6 +150,8 @@ IF (
 ## Calculation groups offer dynamic format strings
 [Alberto Ferrari video on Dynamic format strings](https://www.youtube.com/watch?v=PTaZxL8KPzE)
 
+## [Creating custom groups using Calculation Items](https://www.youtube.com/watch?v=l6si02kf4eU) 
+
 
 
 
