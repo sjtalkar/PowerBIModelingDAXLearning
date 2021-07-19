@@ -119,6 +119,37 @@ If the Calculated Item is called YTD:
 > The Precedence property is an integer value assigned to a calculation group. A higher value means a higher precedence of application; the calculation group with the higher precedence is applied first. In other words, DAX applies the calculation groups according to their Precedence value sorted in a descending order. The absolute value assigned to Precedence does not mean anything. What matters is how it compares with the Precedence of other calculation groups. There cannot be two calculation groups in a model with the same Precedence.
 
 
+## Restricting application of calculated item to selected measures
+```
+IF (
+    ISSELECTEDMEASURE (
+        [Sales Amount],
+        [Gross Amount],
+        [Discount Amount],
+        [Sales Quantity],
+        [Total Cost],
+        [Margin]
+    ),
+    DIVIDE (
+        SELECTEDMEASURE (),
+        COUNTROWS ( 'Date' )
+    )
+)
+```
+**or**
+```
+IF (
+    NOT ( SELECTEDMEASURENAME () = "Margin %" ),
+    DIVIDE (
+        SELECTEDMEASURE (),
+        COUNTROWS ( 'Date' )
+    )
+)
+```
+
+## Calculation groups offer dynamic format strings
+[Alberto Ferrari video on Dynamic format strings](https://www.youtube.com/watch?v=PTaZxL8KPzE)
+
 
 
 
