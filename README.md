@@ -1,7 +1,9 @@
 # PowerBI  Calculation Groups
 
 [Video with Marco Russo](https://www.youtube.com/watch?v=a4zYT-N-zsU&t=623s)
+
 [Video with Kane Snyder](https://www.youtube.com/watch?v=IH4bcHhxunw)
+
 Definitive Guide to DAX Second Edition
 
 
@@ -24,7 +26,7 @@ Definitive Guide to DAX Second Edition
 > - The ordinal of the calculated item detemines the sorting order 
 
 > - The formatting of the Calculated Item
-  `#,0" or "0.00%" or "\$#,0.00;(\$#,0.00);\$#,0.00"
+  `#,0" or "0.00%" or "\$#,0.00;(\$#,0.00);\$#,0.00"`
   
 > The Calculated Group is offered as a Tablein reporting and the Items are offered as Columns
 
@@ -50,7 +52,7 @@ Definitive Guide to DAX Second Edition
       SELECTEDMEASUREORMATSTRING()
       )
       
-   ```
+ ```
   
   - If you do not want labels, use UNICHAR(8203)
 
@@ -74,7 +76,7 @@ Definitive Guide to DAX Second Edition
       BLANK(),
       SELECTEDMEASURE()
       )
-     ``` 
+  ``` 
       
  ### Create a Selector with the Calculated Group's Name/Formula
   
@@ -103,11 +105,8 @@ Definitive Guide to DAX Second Edition
 > A calculation item is a much more sophisticated entity, and here is the list of its properties:
 
 1. The calculation item Name. This becomes one value of the calculation group column. Indeed, a calculation item is like one row in the calculation group table.
-
 2. The calculation item Expression. A DAX expression that might contain special functions like SELECTEDMEASURE. This is the expression that defines how to apply the calculation item.
-
 3. The sort order of the calculation item is defined by the Ordinal value. This property defines how the different calculation items are sorted when presented to the user. It is very similar to the sort-by-column feature of the data model. This feature is not available as of April 2019 but should be implemented before calculation groups are released.
-
 4. **Format String.** If not specified, a calculation item inherits the format string of its base measure. Nevertheless, if the modifier changes the calculation, then it is possible to override the measure format string with the format of the calculation item.
 
 
