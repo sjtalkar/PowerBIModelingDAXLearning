@@ -153,6 +153,9 @@ IF (
 ## [Creating custom groups using Calculation Items](https://www.youtube.com/watch?v=l6si02kf4eU) 
 
 
+# [Dataflows Webinar](https://info.microsoft.com/ww-Thankyou-harness-PowerBI-SelfService-Prep-Dataflows.html?LCID=EN-US&ocid=eml_pg271206_gdc_comm_ba)
+
+Dataflows and direct query is at about 20 mins in.
 
 
    
