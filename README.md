@@ -1,3 +1,22 @@
+# powerbicertificationlearning
+Variety of exercises covering visualization Python DAX and Oracle DB data
+
+> SQL BI DAX.do exercises
+-   [JOINS](https://github.com/sjtalkar/powerbicertificationlearning/blob/master/SQLBITrainingOnDAXDo.md)
+-   [TOPN](https://www.youtube.com/watch?v=eoEbnQyianU)
+
+
+> Phil Seamark A
+- [Aggregations](https://www.youtube.com/watch?v=KKWdKD4ztYQ)
+
+The files contained here have work involving custom visualizations such as heat maps
+There is advanced DAX formula 
+It has advanced Excel Power Pivot examples
+There is Python visualization as well as Python code that can be used for Fibonacci sequence (recursion) for instance that cannot be handled in DAX
+
+
+
+
 # PowerBI  Calculation Groups
 
 [Video with Marco Russo](https://www.youtube.com/watch?v=a4zYT-N-zsU&t=623s)
