@@ -16,7 +16,8 @@ There is advanced DAX formula
 It has advanced Excel Power Pivot examples
 There is Python visualization as well as Python code that can be used for Fibonacci sequence (recursion) for instance that cannot be handled in DAX
 
-
+# [Power BI AI Features](https://www.linkedin.com/posts/ali-sharifi-33a60634_top-15-lod-expressions-activity-6840165259098112000-67MF) 
+- Automated and transparent (Beyond if statements)
 
 
 # PowerBI  Calculation Groups
