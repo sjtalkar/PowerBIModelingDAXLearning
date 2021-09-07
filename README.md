@@ -6,6 +6,8 @@ Variety of exercises covering visualization Python DAX and Oracle DB data
 -   [TOPN](https://www.youtube.com/watch?v=eoEbnQyianU)
 
 
+> ### [Performance webinar](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/PerformanceWebinarWithMarcoRusso.md)
+
 > Phil Seamark A
 - [Aggregations](https://www.youtube.com/watch?v=KKWdKD4ztYQ)
 
