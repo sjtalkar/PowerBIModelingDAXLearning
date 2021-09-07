@@ -15,5 +15,8 @@
 
 ### Power query or SQL transformations AT 33 mins into video
   - If you are a developer perform most of your transformations in a view rather than in Power Query
+  - Performance in Power Query can never be better than what you can get in the database. 
+  - If possible and allowed move all your tansformations as view into the database.
+  - Power query is a simpler tool mainly for non-developers and when you are connecting to non-relational database sources.
   
 
