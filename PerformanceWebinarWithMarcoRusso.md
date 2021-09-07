@@ -12,5 +12,8 @@
 ### Performance in Power Query
   - Look into tranformations in Power Query
   - Sometimes the values are cached and the performance downgrade may not be evident
+
+### Power query or SQL transformations AT 33 mins into video
+  - If you are a developer perform most of your transformations in a view rather than in Power Query
   
 
