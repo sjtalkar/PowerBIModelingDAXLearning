@@ -17,7 +17,13 @@ It has advanced Excel Power Pivot examples
 There is Python visualization as well as Python code that can be used for Fibonacci sequence (recursion) for instance that cannot be handled in DAX
 
 # [Power BI AI Features](https://www.linkedin.com/posts/ali-sharifi-33a60634_top-15-lod-expressions-activity-6840165259098112000-67MF) 
+### [AI In a day by BlueGranite](https://www.youtube.com/watch?v=Ol_3hGHKJAw)
+#### [BlueGranite AI in a day GitHub](https://github.com/BlueGranite/AI-in-a-Day)
 - Automated and transparent (Beyond if statements)
+- AI in visuals can be accessed by : right click on a bar in a bar chart
+   - Options available : Analyse 
+       - Explain Increase
+       - Find where this distrubution is different 
 
 
 # PowerBI  Calculation Groups
