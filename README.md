@@ -2,7 +2,7 @@
 Variety of exercises covering visualization Python DAX and Oracle DB data
 
 > SQL BI DAX.do exercises
--   [JOINS](https://github.com/sjtalkar/powerbicertificationlearning/blob/master/SQLBITrainingOnDAXDo.md)
+-   [JOINS](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/SQLBITrainingOnDAXDo.md)
 -   [TOPN](https://www.youtube.com/watch?v=eoEbnQyianU)
 
 
