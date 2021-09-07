@@ -9,3 +9,8 @@
   - Partition and introduce incremental refresh
   - Set a partition strategy - set data into ranges based on some column
 
+### Performance in Power Query
+  - Look into tranformations in Power Query
+  - Sometimes the values are cached and the performance downgrade may not be evident
+  
+
