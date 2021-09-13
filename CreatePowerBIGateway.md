@@ -48,4 +48,4 @@ When is it feasuble to avoid using a Gateway
 > Evaluating the usage of the gateway in the service
  - Go to the dataset and check out the Settings and the Gateway connections
  - OR in the service, in the top right Settings Gear, select Manage Gateways
- - By seelcting a Gateway there willbe provided a dropdown from which you can select your datasources
+ - By seelcting a Gateway Connections in Settings there will be provided a dropdown from which you can select your datasources
