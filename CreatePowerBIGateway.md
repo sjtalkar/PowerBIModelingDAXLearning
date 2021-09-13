@@ -44,3 +44,8 @@ When is it feasuble to avoid using a Gateway
     - Other Admins can be added at a later time
 - Set up the gateway name - set up a convention 
 - **Recovery key** -- STORE THIS CAREFULLY
+
+> Evaluating the usage of the gateway in the service
+ - Go to the dataset and check out the Settings and the Gateway connections
+ - OR in the service, in the top right Settings Gear, select Manage Gateways
+ - By seelcting a Gateway there willbe provided a dropdown from which you can select your datasources
