@@ -33,3 +33,7 @@ When is it feasuble to avoid using a Gateway
 [INSTALLATION](https://docs.microsoft.com/en-us/data-integration/gateway/service-gateway-install)
 [Video on Enterprise setup](https://www.youtube.com/watch?v=fejSQmshwrE&t=2s)
 
+> Where should the gateway be installed
+ - A machine that is always on and is connected to a wired netweork (not WIFI - preferably)
+ - Recommended that the machine have a Solid State Drive (data is often cached on the hard drive before sending it out on the Gateway
+
