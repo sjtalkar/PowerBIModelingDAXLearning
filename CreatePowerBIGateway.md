@@ -31,4 +31,5 @@ When is it feasuble to avoid using a Gateway
     If the client has an on-prem database and you want to use it as an ADF data source, they must install the runtime on a machine in their on-prem environment.
 
 [INSTALLATION](https://docs.microsoft.com/en-us/data-integration/gateway/service-gateway-install)
+[Video on Enterprise setup](https://www.youtube.com/watch?v=fejSQmshwrE&t=2s)
 
