@@ -1,3 +1,29 @@
+> [**Thinking in terms of a table**](https://www.youtube.com/watch?v=Hqs0lJJq1YA)
+To get the first Sales date of a sales of a product 
+- To note below:
+-   When the Product table is summarized, the aggregated values is obtained through a Calculate - since the grouping is a group table.
+-   The measure starts with creating this table of Product Key and minimum sales amount for each product key
+-   It has to return a  Scalar value
+-   It applies a context transition and uses this table in a Calculate to return the Sales amount
+
+DEFINE
+    MEASURE 'Sales'[SalesOnFirstSalesDate] =
+        VAR ProductAndFirstDate =
+            ADDCOLUMNS (
+                SUMMARIZE ( 'Product', 'Product'[ProductKey] ),
+                "@FirstSale", CALCULATE ( MIN ( Sales[Order Date] ) )
+            )
+        RETURN
+            CALCULATE ( [Sales Amount], ProductAndFirstDate )
+EVALUATE
+ADDCOLUMNS (
+ - To note below
+ VALUES ( 'Product'[Brand] ),
+    "SalesOnFirstSaleDate", [SalesOnFirstSalesDate]
+)
+
+
+
 > **[NATURAL LEFTOUT and INNER joins](https://www.youtube.com/watch?v=eoEbnQyianU)**
 
 > - Lineage broken through concatenation with & ""
