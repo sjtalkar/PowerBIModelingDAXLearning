@@ -25,6 +25,31 @@ ADDCOLUMNS (
 )
 
 ```
+> **[Variables are constants](https://www.youtube.com/watch?v=P5CBmTTPWOQ&list=TLPQMTEwOTIwMjED_fmNTHRHzw&index=3)**
+```
+DEFINE
+    MEASURE 'Sales'[SalesInAVariable] =
+        VAR captureSales = [Sales Amount]
+        VAR Result =
+            CALCULATE ( captureSales, 'Date'[Calendar Year] == "2020" )
+        RETURN
+            Result
+    MEASURE 'Sales'[SalesNOTInAVariable] =
+        VAR Result =
+            CALCULATE ( [Sales Amount], 'Date'[Calendar Year] == "CY 2020" )
+        RETURN
+            Result
+EVALUATE
+ADDCOLUMNS (
+    VALUES ( 'Product'[Brand] ),
+    "SalesinCapturedVariable", [SalesInAVariable],
+    "SalesNOTinCapturedVariable", [SalesNOTInAVariable]
+)
+EVALUATE
+VALUES ( 'Date'[Calendar Year] )
+```
+        
+
 
 
 > **[NATURAL LEFTOUT and INNER joins](https://www.youtube.com/watch?v=eoEbnQyianU)**
