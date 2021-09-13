@@ -36,4 +36,5 @@ When is it feasuble to avoid using a Gateway
 > Where should the gateway be installed
  - A machine that is always on and is connected to a wired netweork (not WIFI - preferably)
  - Recommended that the machine have a Solid State Drive (data is often cached on the hard drive before sending it out on the Gateway
+ - Locate the Gateway close to the Source (perhaps not on the same machine as the DB server)
 
