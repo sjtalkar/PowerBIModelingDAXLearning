@@ -25,5 +25,10 @@ When is it feasuble to avoid using a Gateway
 - When you do not have on-premise, that is local sources
 - When you have Cloud services (such as Sharepoint files)
 - When you do not need to refersh in the sevice! ( refresh manually and publish to the cloud)
+- When using ADF Azure Data Factory Integration Runtime.
+    Which is similar to a data gateway
+    The runtime is an application installed on the VM or machine running SQL Server.
+    If the client has an on-prem database and you want to use it as an ADF data source, they must install the runtime on a machine in their on-prem environment.
 
 [INSTALLATION](https://docs.microsoft.com/en-us/data-integration/gateway/service-gateway-install)
+
