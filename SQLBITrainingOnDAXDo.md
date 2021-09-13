@@ -11,16 +11,19 @@ DEFINE
         VAR ProductAndFirstDate =
             ADDCOLUMNS (
                 SUMMARIZE ( 'Product', 'Product'[ProductKey] ),
+                ---Note that having an expression aggregation breaks the lineage
                 "@FirstSale", CALCULATE ( MIN ( Sales[Order Date] ) )
-            )
+            ) --Note: Restore the lineage        
+        VAR ProductsAndFirstDateWithLineage =
+            TREATAS ( ProductAndFirstDate, 'Product'[ProductKey], Sales[Order Date] )
         RETURN
             CALCULATE ( [Sales Amount], ProductAndFirstDate )
 EVALUATE
 ADDCOLUMNS (
- - To note below
- VALUES ( 'Product'[Brand] ),
+    VALUES ( 'Product'[Brand] ),
     "SalesOnFirstSaleDate", [SalesOnFirstSalesDate]
 )
+
 
 
 
