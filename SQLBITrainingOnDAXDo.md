@@ -5,7 +5,7 @@ To get the first Sales date of a sales of a product
 -   The measure starts with creating this table of Product Key and minimum sales amount for each product key
 -   It has to return a  Scalar value
 -   It applies a context transition and uses this table in a Calculate to return the Sales amount
-
+```
 DEFINE
     MEASURE 'Sales'[SalesOnFirstSalesDate] =
         VAR ProductAndFirstDate =
@@ -24,13 +24,14 @@ ADDCOLUMNS (
     "SalesOnFirstSaleDate", [SalesOnFirstSalesDate]
 )
 
-
+```
 
 
 > **[NATURAL LEFTOUT and INNER joins](https://www.youtube.com/watch?v=eoEbnQyianU)**
 
 > - Lineage broken through concatenation with & ""
 > - TREATAS To select specific values
+```
 DEFINE
     VAR StoresByCountry =
         SELECTCOLUMNS (
@@ -53,3 +54,4 @@ CustomersByCountry
 EVALUATE NATURALLEFTOUTERJOIN (StoresByCountry, CustomersByCountry)
 
 EVALUATE NATURALINNERJOIN (StoresByCountry, CustomersByCountry)
+```
