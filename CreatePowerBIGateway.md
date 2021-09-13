@@ -37,4 +37,10 @@ When is it feasuble to avoid using a Gateway
  - A machine that is always on and is connected to a wired netweork (not WIFI - preferably)
  - Recommended that the machine have a Solid State Drive (data is often cached on the hard drive before sending it out on the Gateway
  - Locate the Gateway close to the Source (perhaps not on the same machine as the DB server)
-
+ - Start viewing for installation from 6:30 (https://www.youtube.com/watch?v=fejSQmshwrE&t=2s)
+- After installation 
+    - Email Address to use with this gateway Sign in using the same account you use to login to PowerBI.com (the service) 
+    - This will become "an" admin for the gateway
+    - Other Admins can be added at a later time
+- Set up the gateway name - set up a convention 
+- **Recovery key** -- STORE THIS CAREFULLY
