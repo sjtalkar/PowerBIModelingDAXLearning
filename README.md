@@ -185,6 +185,27 @@ IF (
 
 Dataflows and direct query is at about 20 mins in.
 
+# Obscure DAX function that has Pandas Describe like functionality
+> Connect a PBIX model to DAX studio and run the below and set the output as static Excel file
+EVALUATE
+COLUMNSTATISTICS()
+
+This will give you statistics for all the tables and columns in the model.
+As an exmaple the ouput looks like the below.
+You can then import this table into a PBIX and use the column statistics.
+
+Table Name	         Column Name	                                          Min	Max	Cardinality	Max Length
+Fact DIAD Response	RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61			         211	
+Fact DIAD Response	Organization	                                       365 Cannabis	Yrcw	118	46
+Fact DIAD Response	Department	Accounting	Workforce Optimization Group	47	38
+Fact DIAD Response	Overall, how satisfied were you with the event?		   5.0	5	3
+
+
+
+![image](https://user-images.githubusercontent.com/7129567/133482119-a854ded7-6ae0-4777-9117-eb1926b7febe.png)
+
+
+
 
    
  
