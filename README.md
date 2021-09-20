@@ -35,6 +35,12 @@ There is Python visualization as well as Python code that can be used for Fibona
 Definitive Guide to DAX Second Edition
 
 
+
+# [Custom Calendar such as 4-4-5](https://www.daxpatterns.com/week-related-calculations/)
+   [Older version](https://www.sqlbi.com/articles/week-based-time-intelligence-in-dax/)
+
+
+
 > Requirements - Tabular Editor to create and maintain
 
 > Calculation groups can apply **specific calculations** on top of **existing DAX measures**. 
