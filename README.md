@@ -35,12 +35,6 @@ There is Python visualization as well as Python code that can be used for Fibona
 Definitive Guide to DAX Second Edition
 
 
-
-# [Custom Calendar such as 4-4-5](https://www.daxpatterns.com/week-related-calculations/)
-   [Older version](https://www.sqlbi.com/articles/week-based-time-intelligence-in-dax/)
-
-
-
 > Requirements - Tabular Editor to create and maintain
 
 > Calculation groups can apply **specific calculations** on top of **existing DAX measures**. 
@@ -209,6 +203,26 @@ Fact DIAD Response	Overall, how satisfied were you with the event?		   5.0	5	3
 
 
 ![image](https://user-images.githubusercontent.com/7129567/133482119-a854ded7-6ae0-4777-9117-eb1926b7febe.png)
+
+
+
+# [Custom Calendar such as 4-4-5](https://www.daxpatterns.com/week-related-calculations/)
+   [Older version](https://www.sqlbi.com/articles/week-based-time-intelligence-in-dax/)
+   
+   A fiscal calendar is based on weeks, this pattern should be used instead of other patterns based on calendar months.
+   The assumptions in this pattern are:
+     - Every year is a set of complete weeks;
+     - Every period within the year (quarter, month) is a set of complete weeks;
+     - The fiscal year always starts on the same day of the week, so it does not always start on January 1.
+     - The fiscal month and the fiscal quarter always start on the same day of the week, so they do not always start on the first day of a month.
+     
+     The pattern does not rely on the standard time intelligence functions. Therefore, the Date table does not have the requirements needed for standard DAX time intelligence functions. The formulas are identical whether you have one row for each week or one row for each day. The examples contain one row for each day, in order to create a relationship with the Sales table through the Sales[Order Date] column.
+     
+     If there is a Date column in the Date table, the **Mark as a Date Table setting is allowed** but not required. The formulas in this pattern do not rely on the automatic REMOVEFILTERS being applied over the Date table when the Date column is filtered. Instead, all the formulas use a specific REMOVEFILTERS over the Date table to get rid of the existing filters, replacing them with the minimum number of filters that guarantee the result.
+
+
+
+
 
 
 
