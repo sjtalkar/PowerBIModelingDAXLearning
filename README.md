@@ -219,6 +219,17 @@ Fact DIAD Response	Overall, how satisfied were you with the event?		   5.0	5	3
      The pattern does not rely on the standard time intelligence functions. Therefore, the Date table does not have the requirements needed for standard DAX time intelligence functions. The formulas are identical whether you have one row for each week or one row for each day. The examples contain one row for each day, in order to create a relationship with the Sales table through the Sales[Order Date] column.
      
      If there is a Date column in the Date table, the **Mark as a Date Table setting is allowed** but not required. The formulas in this pattern do not rely on the automatic REMOVEFILTERS being applied over the Date table when the Date column is filtered. Instead, all the formulas use a specific REMOVEFILTERS over the Date table to get rid of the existing filters, replacing them with the minimum number of filters that guarantee the result.
+     
+     
+     **What's a filter safe column**
+     
+    > The Year Quarter Number column is a regular column: the formulas in this pattern have the option of changing its value during their computation. To compute the previous quarter, the formulas change the filter context by subtracting one to the value of Year Quarter Number in the filter context. Conversely, the Day of Week column is a filter-safe column. If a user filters Monday to Friday, the formulas do not alter that filter on the day of the week. Therefore, a previous-quarter measure keeps the filter on the day of the week, and replaces only the filter on calendar columns such as year, month, and date.
+    
+    Calendar columns: Date, Fiscal Year, Fiscal Year Number, Fiscal Quarter, Fiscal Quarter Number, Fiscal Year Quarter, Fiscal Year Quarter Number, Fiscal Week, Fiscal Week Number, Fiscal Year Week, Fiscal Year Week Number, Fiscal Month, Fiscal Month Number, Fiscal Year Month, Fiscal Year Month Number, Day of Fiscal Month Number, Day of Fiscal Quarter Number, Day of Fiscal Year Number.
+Filter-safe columns: Day of Week, Day of Week Number, Working Day.
+
+** If your Date table does not contain any filter-safe column, then you can use REMOVEFILTERS instead of ALLEXCEPT in all the measures of this pattern.**
+     
 
 
 
