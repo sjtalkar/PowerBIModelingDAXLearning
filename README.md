@@ -229,7 +229,10 @@ Fact DIAD Response	Overall, how satisfied were you with the event?		   5.0	5	3
 Filter-safe columns: Day of Week, Day of Week Number, Working Day.
 
 ** If your Date table does not contain any filter-safe column, then you can use REMOVEFILTERS instead of ALLEXCEPT in all the measures of this pattern.**
-     
+
+
+[Syncing Slicers without introducing bidirectional filer (at about 12 mins)](https://www.youtube.com/watch?v=x3m7qzsVJqQ)
+In the slier that should be filtered by the first, add a Fileter pane filter for a value that should linmit it as per selection in the first slicer.     
 
 
 
