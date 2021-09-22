@@ -234,7 +234,7 @@ Filter-safe columns: Day of Week, Day of Week Number, Working Day.
 [Syncing Slicers without introducing bidirectional filer (at about 12 mins)](https://www.youtube.com/watch?v=x3m7qzsVJqQ)
 In the slier that should be filtered by the first, add a Fileter pane filter for a value that should linmit it as per selection in the first slicer.     
 
-
+[Getting data using Power BI connector and pushing to a Database](https://www.youtube.com/watch?v=WgIhsF7kEjI)
 
 
 
