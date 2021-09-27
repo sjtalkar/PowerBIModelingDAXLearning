@@ -56,6 +56,9 @@ For instance :
 
 **Snowflaking** is when you do not have a perfect star schema when dimension tables surround your fact tables. In some cases, you have some levels of descriptions stored in different tables. Therefore, some dimensions of your model are linked to some other tables that describe the dimensions in a greater level of detail. Snowflaking is normalizing the dimension tables.
 
+**Denormalization**
+The general rule of thumb is to denormalize your model so that a dimension can describe all the details as much as possible. For instance in Adventure DW,  we have snowflakes of Product Category and Product Subcategory that can be simply denormalized into the Product dimension.
+
 
 
 
