@@ -40,4 +40,25 @@ We now know the questions to ask, but what if the business needs to analyze the 
 
 Having said all that, there is another point to consider. We already have five dimensions in the data warehouse. Those dimensions can potentially be reused in our data model. So, it is wise to look at the other data sources and find commonalities in the data patterns.
 
+## Star schema (dimensional modeling) and snowflaking
+
+First things first, **star schema and dimensional modeling are the same things**.
+
+**Transactional modeling versus star schema modeling**
+In transactional systems, the main goal is to improve the system's performance in creating new records and updating/deleting existing records. So, it is essential to go through the normalization process to decrease data redundancy and increase data entry performance when designing transactional systems. In a straightforward form of normalization, we break tables down into **master-detail tables**.
+
+But the goal of a business analysis system is very different. In business analysis, we need a data model optimized for **querying in the most performant way**.
+
+In a **Star Schema** instead of having fully normalized tables that are then joined/merged and then aggregated to create the sums, average, percents by segments that the business requests,  **we set up a table that is already joined all those tables based on business entities. We aggregate and loaded the data into denormalized tables.**
+For instance :
+- We can summarize the data at the day level instead of holding it at the second level as it exists in the transactional table.
+- The idea of the star schema is to keep all numeric values in separate tables called fact tables and put all descriptive information into other tables called dimension tables.
+
+**Snowflaking** is when you do not have a perfect star schema when dimension tables surround your fact tables. In some cases, you have some levels of descriptions stored in different tables. Therefore, some dimensions of your model are linked to some other tables that describe the dimensions in a greater level of detail. Snowflaking is normalizing the dimension tables.
+
+
+
+
+
+
 
