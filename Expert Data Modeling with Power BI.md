@@ -59,6 +59,22 @@ For instance :
 **Denormalization**
 The general rule of thumb is to denormalize your model so that a dimension can describe all the details as much as possible. For instance in Adventure DW,  we have snowflakes of Product Category and Product Subcategory that can be simply denormalized into the Product dimension.
 
+**There are several ways to keep the file size just below the limit, as follows:**
+
+Import the necessary columns only.
+Import just a portion of data when possible. Explain the technology limitation to the business and ask whether you can filter out some data. For instance, the business may not need to analyze 10 years of data, so filter older data in Power Query.
+Use aggregations. In many cases, you may have the data stored in the source at a very low granularity. However, the business requires data analysis on a higher grain. Therefore, you can aggregate the data to a higher granularity, then import it into the data model. For instance, you may have data stored at a minute level. At the same time, the business only needs to analyze that data at the day level.
+Consider disabling auto date/time settings in Power BI Desktop.
+Consider optimizing data types.
+
+**SHARED DATASETS**
+As the name implies, a shared dataset is a dataset used across various reports in a modern workspace (a new workspace experience) within the Power BI service. Therefore, it is only available in the Power BI Professional and Power BI Premium licensing plans. This feature is quite crucial to data modelers. It provides more flexibility in creating a more generic dataset, covering more business entities in a single dataset instead of having several datasets that may share many commonalities.
+
+**DATAFLOWS**
+Power BI Dataflows
+Dataflows, also referred to as Power Query Online, provide a centralized data preparation mechanism in the Power BI service that other people across the organization can take advantage of. Like using Power Query in Power BI Desktop for data preparation, we can prepare, clean, and transform the data in dataflows. Unlike Power Query queries, which are isolated within a dataset, when created in Power BI Desktop and then published to the Power BI service, you can share all data preparations, data cleansing, and data transformation processes across the organization with dataflows.
+
+
 
 
 
