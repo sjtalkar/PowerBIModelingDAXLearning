@@ -75,7 +75,21 @@ Power BI Dataflows
 Dataflows, also referred to as Power Query Online, provide a centralized data preparation mechanism in the Power BI service that other people across the organization can take advantage of. Like using Power Query in Power BI Desktop for data preparation, we can prepare, clean, and transform the data in dataflows. Unlike Power Query queries, which are isolated within a dataset, when created in Power BI Desktop and then published to the Power BI service, you can share all data preparations, data cleansing, and data transformation processes across the organization with dataflows.
 
 
+**POWER QUERY EDITOR**
+**Enable load to report:** When enabled, data will be loaded into the data model from the source system(s). As you see in Figure 3.15, we merged the Product query with two other queries. Each query may come from a different data source. When this option is disabled, data will not be loaded into the data model. However, if other queries reference this query, data will flow through all the transformation steps applied to this query.
+Include in report refresh: In some cases, we need data to be loaded into the model just once, so we do not need to include the query in the report refresh. When this option is enabled, the query gets refreshed whenever the data model is refreshed. We can either refresh the data model from Power BI Desktop when we click the Refresh button or we can publish the report to the Power BI service and refresh data from the service. Either way, if this option is disabled for a query, that query is no longer included in future data refreshes.
+IMPORTANT NOTE
 
+**The Include in report refresh** option is dependent upon the Enable load to report option. Therefore, if Enable load to report is disabled, then Include in report refresh will also be disabled.
+
+It is a common technique in more complex scenarios to disable Enable load to report for some queries that are created as transformation queries. The other queries then reference these queries.
+
+**Query parameters **
+Data Source
+Filter Rows
+Keep Rows
+Remove Rows
+Replace Rows
 
 
 
