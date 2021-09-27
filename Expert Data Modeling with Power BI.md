@@ -91,7 +91,24 @@ Keep Rows
 Remove Rows
 Replace Rows
 
+**In Chapter 3 you can find this function to rename column names of a table using Table.TransformColumnNames **
+```
+let
+   fnRename = (ColumnName as text) as text =>
+      let
+            SplitColumnName = Splitter.SplitTextByCharacterTransition({"a".."z"}, {"A".."Z"})(ColumnName)
+        in
+    Text.Combine(SplitColumnName, " ")
+ in
+    fnRename
+```
+Note that the above function RETURNS a function
+To call the function:
 
-
-
-
+Now, let's call the fnRenameColumns function in the Product table, as follows:
+Enable Formula Bar if it is not enabled already from the View tab,
+Select the Product table from the Queries pane.
+From the Formula Bar, click the Add Step button () to add a new step. This is quite handy as it shows the last step name, which we will use next. 
+We now use the Table.TransformColumnNames() function, which transforms column names of a given table by a given name-generator function. This table comes from the previous step, and the name-generator function is the fnRenameColumns function we created earlier. So, the function will look like this:
+Table.TransformColumnNames(#"Renamed Columns", fnRenameColumns)
+After committing to the running of this step, all columns in the Product table rename immediately.
