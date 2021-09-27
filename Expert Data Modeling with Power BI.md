@@ -10,7 +10,7 @@ Power BI inherits its blood from Power Pivot and SSAS Tabular models. All of the
 > Scenario
 > -  An OData data source with 15 tables. The tables have between 50 and 250 columns.
 > - An Excel file with 20 sheets that are interdependent with many formulas.
-> A data warehouse hosted in SQL Server. You need to get data from five dimensions and two fact tables:
+> - A data warehouse hosted in SQL Server. You need to get data from five dimensions and two fact tables:
 > - - Of those five dimensions, one is a Date dimension and the other is a Time dimension. The grain of the Time dimension is hour, minute.
 > - - Each of the fact tables has between 50 and 200 million rows. The grain of both fact tables from a date and time perspective is day, hour, minute.
 > - - Your organization has a Power BI Pro license.
