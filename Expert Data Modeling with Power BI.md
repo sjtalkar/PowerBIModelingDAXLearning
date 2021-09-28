@@ -111,4 +111,4 @@ Select the Product table from the Queries pane.
 From the Formula Bar, click the Add Step button () to add a new step. This is quite handy as it shows the last step name, which we will use next. 
 We now use the Table.TransformColumnNames() function, which transforms column names of a given table by a given name-generator function. This table comes from the previous step, and the name-generator function is the fnRenameColumns function we created earlier. So, the function will look like this:
 Table.TransformColumnNames(#"Renamed Columns", fnRenameColumns)
-After committing to the running of this step, all columns in the Product table rename immediately.
+After committing to the running of this step, all columns in the Product table rename immediately.  
