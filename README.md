@@ -240,6 +240,13 @@ In the slier that should be filtered by the first, add a Fileter pane filter for
 ## [How to find measures using a column in the database](https://exceleratorbi.com.au/getting-started-dax-studio/)
 The article in the link shows you how to use DAX Studio to extract all information about Measures: Their Folder, Database columns using the measure, full text of the measure.
 
+In DAX Studio, in the bottom right tab of DMV, you will find MDSCEMA_MEASURES
+In the main pane select the columns you want and export it out to an excel table or you can pivit information in this SQL.
+
+select MEASURE_NAME, MEASURE_UNIQUE_NAME, EXPRESSION, MEASUREGROUP_NAME, MEASURE_DISPLAY_FOLDER
+from $SYSTEM.MDSCHEMA_MEASURES
+![How to use Dax Studio for measure and columns](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/DaxStudioAndMeasuresAndColumns.png)
+
 
 
 
