@@ -237,6 +237,10 @@ In the slier that should be filtered by the first, add a Fileter pane filter for
 [Getting data using Power BI connector and pushing to a Database](https://www.youtube.com/watch?v=WgIhsF7kEjI)
 
 
+## [How to find measures using a column in the database](https://exceleratorbi.com.au/getting-started-dax-studio/)
+The article in the link shows you how to use DAX Studio to extract all information about Measures: Their Folder, Database columns using the measure, full text of the measure.
+
+
 
 
 
