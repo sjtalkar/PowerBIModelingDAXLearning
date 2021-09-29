@@ -241,7 +241,7 @@ In the slier that should be filtered by the first, add a Fileter pane filter for
 The article in the link shows you how to use DAX Studio to extract all information about Measures: Their Folder, Database columns using the measure, full text of the measure.
 
 In DAX Studio, in the bottom right tab of DMV, you will find MDSCHEMA_MEASURES
-In the main pane select the columns you want and export it out to an excel table or you can pivit information in this SQL.
+In the main pane select the columns you want and export it out to an excel table or you can pivot information in this SQL.
 ```SQL
 select MEASURE_NAME, 
       MEASURE_UNIQUE_NAME, 
