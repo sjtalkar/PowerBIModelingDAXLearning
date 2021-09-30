@@ -115,3 +115,11 @@ After committing to the running of this step, all columns in the Product table r
 
 
 ## Star Schema and Data Modeling Common Best Practices
+
+### Bridge tables
+In relational data modeling, unlike in Power BI, we can only implement the many-to-many relationship using a bridge table regardless. In classic relational data modeling, we put the primary keys of both tables participating in the relationship into an intermediary table referred to as a bridge table. The bridge tables usually are available in the transactional source systems. For instance, there is always a many-to-many relationship between a customer and a product in a sales system. A customer can buy many products, and a product can end up in many customers' shopping bags. What happens in the sales system is that when we go to the cashier to pay for the products we bought, the cashier scans each product's barcode. So the system now knows which customer bought which product.
+
+In data modeling using the Star Schema approach, a bridge table is a table created specifically for managing many-to-many relationships. The many-to-many relationships usually happen between two or more dimensions. However, there are some cases when two fact tables are involved in a many-to-many relationship. In data modeling in the Star Schema, the fact tables containing the foreign keys of the dimensions without any other additive values are called factless fact tables.
+
+The below is an example of a bridge table linked through a composite key or order id and line item id that handles a Many-to-Many relationship that exists between the two tables
+![Bridge](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/BridgeTableusingcompositekeys.PNG)
