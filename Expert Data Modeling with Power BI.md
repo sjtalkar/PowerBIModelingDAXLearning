@@ -128,3 +128,6 @@ NOTE: In the table below we have to change the relationship between Internet Sal
 
 
 From a data modeling perspective, there is now a many-to-many relationship between the Internet Sales table and the Sales Reasontas ble via the bridge (the Internet Sales Reasons) table. Consequently, there is also a many-to-many relationship between the Customer table and the Sales Reason table. We can now visualize the data and see whether we can satisfy the business requirements to analyze customers' buying behavior for Quantity Sold over Sales Reasons.
+
+
+After we have implemented the many-to-many in our data model, it is good to hide the bridge table from the data model. We only have the bridge table in our data model as it carries the key columns of both tables participating in the many-to-many relationship. Hiding the bridge table also avoids confusion for other report creators who connect to our dataset to build the reports.
