@@ -112,3 +112,6 @@ From the Formula Bar, click the Add Step button () to add a new step. This is qu
 We now use the Table.TransformColumnNames() function, which transforms column names of a given table by a given name-generator function. This table comes from the previous step, and the name-generator function is the fnRenameColumns function we created earlier. So, the function will look like this:
 Table.TransformColumnNames(#"Renamed Columns", fnRenameColumns)
 After committing to the running of this step, all columns in the Product table rename immediately.  
+
+
+## Star Schema and Data Modeling Common Best Practices
