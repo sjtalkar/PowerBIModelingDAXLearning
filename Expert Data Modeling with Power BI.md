@@ -122,7 +122,9 @@ In relational data modeling, unlike in Power BI, we can only implement the many-
 In data modeling using the Star Schema approach, a bridge table is a table created specifically for managing many-to-many relationships. The many-to-many relationships usually happen between two or more dimensions. However, there are some cases when two fact tables are involved in a many-to-many relationship. In data modeling in the Star Schema, the fact tables containing the foreign keys of the dimensions without any other additive values are called factless fact tables.
 
 The below is an example of a bridge table linked through a composite key or order id and line item id that handles a Many-to-Many relationship that exists between the two tables
+
+NOTE: In the table below we have to change the relationship between Internet Sales and Internet Sales reason to bidirectional to aloo for a filter to flow from Sales Reason to Internet Sales Fact table, so that the Qty can be filtered.
 ![Bridge](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/BridgeTableusingcompositekeys.PNG)
 
 
-From a data modeling perspective, there is now a many-to-many relationship between the Internet Sales table and the Sales Reasons table via the bridge (the Internet Sales Reasons) table. Consequently, there is also a many-to-many relationship between the Customer table and the Sales Reason table. We can now visualize the data and see whether we can satisfy the business requirements to analyze customers' buying behavior for Quantity Sold over Sales Reasons.
+From a data modeling perspective, there is now a many-to-many relationship between the Internet Sales table and the Sales Reasontas ble via the bridge (the Internet Sales Reasons) table. Consequently, there is also a many-to-many relationship between the Customer table and the Sales Reason table. We can now visualize the data and see whether we can satisfy the business requirements to analyze customers' buying behavior for Quantity Sold over Sales Reasons.
