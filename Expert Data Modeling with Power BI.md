@@ -123,3 +123,6 @@ In data modeling using the Star Schema approach, a bridge table is a table creat
 
 The below is an example of a bridge table linked through a composite key or order id and line item id that handles a Many-to-Many relationship that exists between the two tables
 ![Bridge](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/BridgeTableusingcompositekeys.PNG)
+
+
+From a data modeling perspective, there is now a many-to-many relationship between the Internet Sales table and the Sales Reasons table via the bridge (the Internet Sales Reasons) table. Consequently, there is also a many-to-many relationship between the Customer table and the Sales Reason table. We can now visualize the data and see whether we can satisfy the business requirements to analyze customers' buying behavior for Quantity Sold over Sales Reasons.
