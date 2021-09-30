@@ -253,6 +253,9 @@ from $SYSTEM.MDSCHEMA_MEASURES
 ![How to use Dax Studio for measure and columns](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/DaxStudioAndMeasuresAndColumns.png)
 
 
+## [Data Modeling](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Expert%20Data%20Modeling%20with%20Power%20BI.md)
+
+
 
 
 
