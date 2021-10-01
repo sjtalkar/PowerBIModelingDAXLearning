@@ -142,7 +142,7 @@ Internet Sales Due =
  ```
 
 
-## Creating Configration Tables to segmenting or binning data
+## Creating Configuration Tables to segmenting or binning data
 
 | Sort | Price Range | From  | To    |
 |------|-------------|-------|-------|
@@ -163,3 +163,8 @@ Price Range =
             )
     )
 ```
+
+## Reducing model size by disabling auto date/time
+When the data is loaded into the data model, Power BI automatically creates some Date tables to support calendar hierarchies for all columns in DateTime datatype. This feature is convenient, especially for beginners who do not know how to create a Date table or create and manage hierarchies. However, it can consume too much storage, which can potentially lead to severe performance issues. And so make sure you create a Date table, mark it and disable uo Date/Time table.
+
+
