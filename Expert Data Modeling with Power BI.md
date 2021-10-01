@@ -131,3 +131,12 @@ From a data modeling perspective, there is now a many-to-many relationship betwe
 
 
 After we have implemented the many-to-many in our data model, it is good to hide the bridge table from the data model. We only have the bridge table in our data model as it carries the key columns of both tables participating in the many-to-many relationship. Hiding the bridge table also avoids confusion for other report creators who connect to our dataset to build the reports.
+
+## Activating inactive relationships
+The USERELATIONSHIP() function activates an inactive relationship for the duration that the measure is calculating. So to meet the preceding business requirements, we can create two new measures. The following DAX expression activates the DueDateKey -> DateKey relationship:
+```
+Internet Sales Due =
+    CALCULATE([Internet Sales]
+        , USERELATIONSHIP('Internet Sales'[DueDateKey], 'Date'[DateKey])
+    )
+    ```
