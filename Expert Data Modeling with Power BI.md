@@ -139,4 +139,27 @@ Internet Sales Due =
     CALCULATE([Internet Sales]
         , USERELATIONSHIP('Internet Sales'[DueDateKey], 'Date'[DateKey])
     )
-    ```
+ ```
+
+
+## Creating Configration Tables to segmenting or binning data
+
+| Sort | Price Range | From  | To    |
+|------|-------------|-------|-------|
+| 4    | Low         | 0     | 50    |
+| 3    | Medium      | 51    | 450   |
+| 2    | High        | 451   | 1500  |
+| 1    | Very High   | 1501  | 15000 |
+
+To use the Unit Price "range" table
+Create a  new calculated column that looks up the Price Range value for each UnitPrice value within the Sales table. To do so, we have to compare the UnitPrice value of each row from the  Sales table with the values of the From and To columns from the Unit Price Ranges table. The following DAX expressions cater for that:
+```
+Price Range =
+    CALCULATE(
+       VALUES('Unit Price Ranges'[Price Range])
+        , FILTER('Unit Price Ranges'
+            , 'Unit Price Ranges'[From] < 'Internet Sales'[UnitPrice]
+               && 'Unit Price Ranges'[To] >= 'Internet Sales'[UnitPrice]
+            )
+    )
+```
