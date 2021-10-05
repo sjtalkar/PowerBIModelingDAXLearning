@@ -8,9 +8,14 @@
     If you opt to change the model then a Popup will appear.
     The Pop up tells you that if you change the model then the love connection will change into Direct Query and and then you will have a local model will be added to the PBIX.
     Also this change is permanent.
+    
+  2. When you enable the preview, you also get a new tab inside the modeling tab : **Make Changes to this model**. 
+  3. After you set the preview, you can also "Get Data".
+  4. If you change the model from Live Connection to Direct Query, you get a local copy of the schema.
+  5. You are warned of a Potential Security Risk.
 
 
-![Source]https://www.youtube.com/watch?v=L3uT-cn_eO8
+[Source]https://www.youtube.com/watch?v=L3uT-cn_eO8
 
 Points noted:
 - Keep the Fact table narrow
