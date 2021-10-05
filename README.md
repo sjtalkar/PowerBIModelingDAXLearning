@@ -255,6 +255,67 @@ from $SYSTEM.MDSCHEMA_MEASURES
 
 ## [Data Modeling](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Expert%20Data%20Modeling%20with%20Power%20BI.md)
    [Data Import modes : Composite Models](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Data%20input%20Modes%20and%20Models.md)
+   
+   
+   
+## Workspace Configuration
+
+#### What is a Workspace 
+
+- A workspace is like a shared folder containing reports and datasets that can be shared.  
+
+- Role Based Access Control is employed – Member/Viewer/Contributor/Admin  
+
+- The RBAC is applicable to the entire contents of the Workspace. It is a single sharing unit. 
+
+- With an App you can share a subset of the workspace. 
+
+ 
+
+#### Separating Workspaces – when do you create a new workspace 
+
+- Audience :Primary reason to create a new workspace is if the data is entirely different and is handled and visualized very differently for a distinct set of audience.  
+    - This can be based on organization functionality and departments 
+
+    - This can be based on the data available in the workspace – who can view and modify that data 
+
+    - This can be based on the reports to be created from the data in the workspace 
+
+          - E.g. Finance and HR 
+
+ 
+
+- Split the load : (only applicable for Premium and embedded  
+
+    - Say you have many clients and some clients in particular have a lot of data  
+
+    - Best practice is to split the dataset for this large client into its own Workspace 
+
+ 
+
+- Sharing a workspace 
+
+    - Reduce redundancy in a Shared Workspace by creating a Shared dataset or a Dataflow 
+
+    - Date tables and common entities (queries with data common across organizational groups ) can be set up here. 
+
+ 
+ - Workspaces for mimicking a development pipeline that is automatically available in Premium 
+
+    - You can create a Dev, UAT testing, Production Workspace ( or tailor it to your developemnt needs) 
+
+ ##### ADDITIONAL DETAILED INFO ABOUT RBAC AND WORKSPACES 
+- Viewer Role : Access to all reports, dashboards, no access to dataset, dataflow or Analyze in Excel 
+
+- Contributor Role: Create and Edit access to the content, Edit access to all content in the workspace. CANNOT publish App. Typically provided to Developers 
+
+- Member Role: All that a contributor can do And CAN publish App.  Edit access to all content in the workspace. CANNOT publish App.  Typically provided to  Deployment Managers 
+
+- Admin Role:  All access for Member role. And provide Admin access to others 
+
+ 
+
+ 
 
 
 
