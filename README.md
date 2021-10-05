@@ -254,6 +254,7 @@ from $SYSTEM.MDSCHEMA_MEASURES
 
 
 ## [Data Modeling](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Expert%20Data%20Modeling%20with%20Power%20BI.md)
+   [Data Import modes : Composite Models](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Data%20input%20Modes%20and%20Models.md)
 
 
 
