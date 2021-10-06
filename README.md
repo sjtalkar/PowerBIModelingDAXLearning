@@ -313,6 +313,9 @@ from $SYSTEM.MDSCHEMA_MEASURES
 
 - Admin Role:  All access for Member role. And provide Admin access to others 
 
+
+[Scaaping data](https://www.youtube.com/watch?v=a0FqNLI0VsQ&t=742s)
+
  
 
  
