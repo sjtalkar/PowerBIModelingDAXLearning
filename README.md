@@ -316,6 +316,8 @@ from $SYSTEM.MDSCHEMA_MEASURES
 
 #[Scraping data](https://www.youtube.com/watch?v=a0FqNLI0VsQ&t=742s)
 
+jsonplaceholder.typicode.com
+
  
 
  
