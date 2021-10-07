@@ -6,7 +6,7 @@
 
 
 1. The Power BI API contains many useful features if you’re looking to interact with Power BI at the API level. In order to use it, we need to register an Azure App first.
-2. Registering an app article has all the details about creating the app. Name of URL https://powerbiapp.cm.com
+2. Registering an app article has all the details about creating the app. Name of URL 
 3. First, follow the instructions here to [register an Azure App to use with Power BI](https://carldesouza.com/how-to-register-an-azure-app-to-use-with-power-bi/). Note the client id and secret.
 4. Next, install Postman for Windows and open it.
 5. Create a new Request. We will create a request to get a Bearer that we will use to authenticate with the Power BI API.
