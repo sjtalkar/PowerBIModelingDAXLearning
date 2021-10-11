@@ -26,7 +26,7 @@
     - HASONEVALUE
 - You also write measres at the granularity of both the summarized and the base tables and using the above functions, you can select the wrie measure for the filter seelcted by the user that indicates granularity.
 
-For example:
+For example this is a CONTROL MEASURE:
 ```
 Internet Sales Total =
  IF(
