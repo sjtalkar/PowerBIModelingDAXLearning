@@ -27,6 +27,7 @@
 - You also write measres at the granularity of both the summarized and the base tables and using the above functions, you can select the wrie measure for the filter seelcted by the user that indicates granularity.
 
 For example this is a CONTROL MEASURE:
+
 ```
 Internet Sales Total =
  IF(
@@ -36,10 +37,12 @@ Internet Sales Total =
         )
 ```
 
+
 **TIP : ** To convert a table at date granularity and summarize it on Year month granularity
-Create a new date key with year and month
-New OrderDateKey = (CONVERT(Integer, ([OrderDateKey]/100)) * 100) + 1
-Summarize on this new key
+
+- Create a new date key with year and month
+```New OrderDateKey = (CONVERT(Integer, ([OrderDateKey]/100)) * 100) + 1```
+- Summarize on this new key
 
 
 
