@@ -41,12 +41,15 @@ Internet Sales Total =
 **TIP : ** To convert a table at date granularity and summarize it on Year month granularity
 
 - Create a new date key with year and month
-```New OrderDateKey = (CONVERT(Integer, ([OrderDateKey]/100)) * 100) + 1
+```
+New OrderDateKey = (CONVERT(Integer, ([OrderDateKey]/100)) * 100) + 1
 ```
 
-```Table.ReplaceValue(#"Removed Other Columns",each [OrderDateKey], each (Int64.From([OrderDateKey]/100) * 100) + 1,Replacer.ReplaceValue,{"OrderDateKey"})
+```
+Table.ReplaceValue(#"Removed Other Columns",each [OrderDateKey], each (Int64.From([OrderDateKey]/100) * 100) + 1,Replacer.ReplaceValue,{"OrderDateKey"})
 ```
 - Summarize on this new key
+
 
 **CONS TO CONSIDER **
 - The summary tables will increase memory and storage consumption.
@@ -56,7 +59,7 @@ Internet Sales Total =
 
 ## Managing aggregations is the most significant scalability feature and is also one of the most powerful data modeling features available within Power BI Desktop, since it unlocks the usage of Big Data in Power BI. 
 
-It is only supported for Quesries that support Direct Query mode
+It is only supported for Query Sources that support Direct Query mode
 
 Here is the process of managing aggregations in Power BI Desktop:
 
