@@ -41,14 +41,34 @@ Internet Sales Total =
 **TIP : ** To convert a table at date granularity and summarize it on Year month granularity
 
 - Create a new date key with year and month
-```New OrderDateKey = (CONVERT(Integer, ([OrderDateKey]/100)) * 100) + 1```
-```Table.ReplaceValue(#"Removed Other Columns",each [OrderDateKey], each (Int64.From([OrderDateKey]/100) * 100) + 1,Replacer.ReplaceValue,{"OrderDateKey"})```
+```New OrderDateKey = (CONVERT(Integer, ([OrderDateKey]/100)) * 100) + 1
+```
+
+```Table.ReplaceValue(#"Removed Other Columns",each [OrderDateKey], each (Int64.From([OrderDateKey]/100) * 100) + 1,Replacer.ReplaceValue,{"OrderDateKey"})
+```
 - Summarize on this new key
 
 **CONS TO CONSIDER **
 - The summary tables will increase memory and storage consumption.
 - The summary tables will also increase the data refresh time.
 - The development time also increases as we need to create the summary table, create the relationships, and create the measures.
+
+
+## Managing aggregations is the most significant scalability feature and is also one of the most powerful data modeling features available within Power BI Desktop, since it unlocks the usage of Big Data in Power BI. 
+
+It is only supported for Quesries that support Direct Query mode
+
+Here is the process of managing aggregations in Power BI Desktop:
+
+- We connect to the data source.
+- We load all the necessary tables in DirectQuery mode:
+    - The data source may include the aggregation table already.
+    - If the summary table is not already in the data source, we can use either Power or DAX to create an aggregation table.
+- We create relationships between tables.
+- We change the storage mode of the summary table to Import mode. Again, we are mindful that this is an irreversible action. We must also change the storage mode of all the dimensions with an active relationship with the summary table to Dual mode.
+- We configure Manage aggregation.
+- We test the aggregation to make sure our queries hit the aggregation.
+
 
  
  
