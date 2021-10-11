@@ -36,6 +36,11 @@ Internet Sales Total =
         )
 ```
 
+**TIP : ** To convert a table at date granularity and summarize it on Year month granularity
+Create a new date key with year and month
+New OrderDateKey = (CONVERT(Integer, ([OrderDateKey]/100)) * 100) + 1
+Summarize on this new key
+
 
 
  
