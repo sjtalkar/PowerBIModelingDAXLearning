@@ -12,3 +12,32 @@
 
 - 2.  Manage aggregations. When it comes to using the Manage aggregations feature, the data source of the base table must support **DirectQuery mode.**
 [List of sources that support Direct Query](https://docs.microsoft.com/en-us/power-bi/connect-data/power-bi-data-sources?WT.mc_id=?WT.mc_id=DP-MVP-5003466.)
+
+### Create a table summarized on a category that the user will typically aggregate the numeric values on
+-  Summarize the large Fact table on the column(s) that the user will typically request summaitions/aggregations on
+-  When you do this you will lose the ability to summarize on any other category as they do not exist in the summarized table. 
+-  For example if you have Region and Product and Product color in the Fact table and you summarize om [Region, Product] combination, then you lose the ability to aggregate on color.
+-  So you retain the base table and if the queries are not supported by Direct Query, then you Manage the switch in the measures from the Aggregated/Summarized table to the base table, manually.
+ - Typical DAX functions that can aid with this switch:
+
+    - ISFILTERED
+    - ISINSCOPE
+    - HASONEFILTER
+    - HASONEVALUE
+- You also write measres at the granularity of both the summarized and the base tables and using the above functions, you can select the wrie measure for the filter seelcted by the user that indicates granularity.
+
+For example:
+```
+Internet Sales Total =
+ IF(
+        OR(ISFILTERED('Product'), ISFILTERED('Customer'))
+        , [Internet Sales]
+       , [Sales Agg]
+        )
+```
+
+
+
+ 
+ 
+
