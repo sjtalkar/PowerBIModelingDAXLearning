@@ -42,9 +42,13 @@ Internet Sales Total =
 
 - Create a new date key with year and month
 ```New OrderDateKey = (CONVERT(Integer, ([OrderDateKey]/100)) * 100) + 1```
+```Table.ReplaceValue(#"Removed Other Columns",each [OrderDateKey], each (Int64.From([OrderDateKey]/100) * 100) + 1,Replacer.ReplaceValue,{"OrderDateKey"})```
 - Summarize on this new key
 
-
+**CONS TO CONSIDER **
+- The summary tables will increase memory and storage consumption.
+- The summary tables will also increase the data refresh time.
+- The development time also increases as we need to create the summary table, create the relationships, and create the measures.
 
  
  
