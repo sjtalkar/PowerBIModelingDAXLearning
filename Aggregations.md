@@ -73,6 +73,12 @@ Here is the process of managing aggregations in Power BI Desktop:
 - We test the aggregation to make sure our queries hit the aggregation.
 
 
- 
- 
+** 
+ IMPORTANT NOTES ABOUT AGGREGATIONS**
+
+The detail table (base table) must be in DirectQuery mode.
+
+Precedence in the Manage aggregations window prioritizes the aggregation hits when we have more than one aggregation table. The bigger the Precedence number, the higher the priority. For example, if we have another aggregation table that we would like to get hit before Sales_Agg, we must set a larger Precedence number for that aggregation table. The xVelocity engine tries to solve the underlying aggregation queries based on their Precedence value.
+
+The data types of the aggregation columns from the aggregation table and the corresponding columns from the detail table must be the same; otherwise, we cannot complete the Manage aggregations.
 
