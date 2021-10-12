@@ -7,11 +7,13 @@
 5. Now Add a Custom Column for each of the columsn with an error:
     - Call the Custom columns <columnname>-Error
     - in the formula, type 
-    ```
+   ```
     try <columnname>
   ```
   - This creates a **Record** for each of the rows 
   - Expand the record a level at a time (make sure to load more to get more cells of the record)
     
-   ![Final Output](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Errorlogs.png) 
+   
+    
+    ![Final Output](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Errorlogs.png) 
   
