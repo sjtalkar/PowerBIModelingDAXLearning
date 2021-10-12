@@ -1,4 +1,7 @@
-# To tag or label images with object names
+# Vision Analytics
+- Power BI Premium and Cognitive Services Account
+
+### To tag or label images with object names
 - Create a table with image URLs
 - With the query containing the URLS selected, Select Vision and select tag image and provide column name containing URL. 
 - Click OK and you will have the result with the most pertinent columns being Tag images.Tag and Tag images.Confidence
