@@ -1,4 +1,4 @@
-#Error Handling in ETL Operations
+# Error Handling in ETL Operations
 
 1. Duplicate the query that shows errors in columns.
 2. Select the columns with Error indicated.
