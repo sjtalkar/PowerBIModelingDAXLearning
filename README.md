@@ -320,6 +320,19 @@ jsonplaceholder.typicode.com
 
 ## [Error Handling in ETL](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/ErrorHandlingInETL.md)
 
+
+## Subtracting an hour from DateTime in M Query
+- Convert the date time to number. 
+- All date times at midnight with be a whole number
+- All date times other than midnight will be a decimal number
+- Subtract 1/24 (a decimal hour) from the date time
+- Convert the value back to DateTime
+
+The below was employed when the electicity generate for a day was to be marked as generated for that day. In this manner the electicity produced at midnight fell within the day it was generated.
+
+```
+DateTime.From(Number.From([#"Date/Time"]) - 1/24)
+```
  
 
  
