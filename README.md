@@ -337,10 +337,20 @@ DateTime.From(Number.From([#"Date/Time"]) - 1/24)
  
  
 ## Functionalities I was introduced to in Helen Wall's course
-Zoom Slider for line chart and Slider tooltips
-try <column name> for creating a Record out of a column with values and status
-Converting date time into a number and decrementing and incrementing it
-In Line chart Customize Series in the Paint roller to change appearnace of line shown by each measure
+- Zoom Slider for line chart and Slider tooltips
+- try <column name> for creating a Record out of a column with values and status
+- Converting date time into a number and decrementing and incrementing it
+- In Line chart Customize Series in the Paint roller to change appearnace of line shown by each measure
+- AVERAGE rolling average (watch out for the divide by 7)  
+   
+   
+```
+   Wind Rolling Average = CALCULATE (
+    [Wind Electricity Generated],
+    DATESINPERIOD ( Dates[Date], LASTDATE ( 'Dates'[Date] ), -7, DAY )
+) / 7
+   
+```   
 
  
 
