@@ -17,3 +17,7 @@
     
 ![Final Output](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Errorlogs.png) 
   
+### To remove the errors rows from the data - if you do not have the means to fix them
+    - In the original query. select the collumns with the errors and Select Remove Rows (and Remove Errors)
+    
+    
