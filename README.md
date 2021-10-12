@@ -340,6 +340,7 @@ DateTime.From(Number.From([#"Date/Time"]) - 1/24)
 Zoom Slider for line chart and Slider tooltips
 try <column name> for creating a Record out of a column with values and status
 Converting date time into a number and decrementing and incrementing it
+In Line chart Customize Series in the Paint roller to change appearnace of line shown by each measure
 
  
 
