@@ -14,5 +14,6 @@
 - First select Detect Language that will return with Language symbol and ISO code
 - Use the ISO code in the Extract Key Phrases functionality of Text Analytics which is invoked again
 
-![Text Analytics Detect Language and ISO Code] https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/TextAnalytics1.png)
-![Text Analytics Extract Key Phrases] https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/TextAnalytics2.png)
+![Text Analytics Detect Language and ISO Code](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/TextAnalytics1.png)
+
+![Text Analytics Extract Key Phrases](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/TextAnalytics2.png)
