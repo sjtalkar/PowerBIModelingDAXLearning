@@ -334,6 +334,12 @@ The below was employed when the electicity generate for a day was to be marked a
 DateTime.From(Number.From([#"Date/Time"]) - 1/24)
 ```
  
+ 
+ 
+## Functionalities I was introduced to in Helen Wall's course
+Zoom Slider for line chart and Slider tooltips
+try <column name> for creating a Record out of a column with values and status
+Converting date time into a number and decrementing and incrementing it
 
  
 
