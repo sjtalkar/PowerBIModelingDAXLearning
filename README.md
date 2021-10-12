@@ -318,6 +318,8 @@ from $SYSTEM.MDSCHEMA_MEASURES
 
 jsonplaceholder.typicode.com
 
+## [Error Handling in ETL](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/ErrorHandlingInETL.md)
+
  
 
  
