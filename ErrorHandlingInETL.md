@@ -12,4 +12,6 @@
   ```
   - This creates a **Record** for each of the rows 
   - Expand the record a level at a time (make sure to load more to get more cells of the record)
+    
+   ![Final Output](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Errorlogs.png) 
   
