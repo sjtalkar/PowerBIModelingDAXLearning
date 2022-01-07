@@ -350,7 +350,34 @@ DateTime.From(Number.From([#"Date/Time"]) - 1/24)
     DATESINPERIOD ( Dates[Date], LASTDATE ( 'Dates'[Date] ), -7, DAY )
 ) / 7
    
-```   
+```  
+   
+   
+ ``` 
+   var vrCostCat = SELECTEDVALUE(xCost[Code], "2+")
+
+var vrSmartSum =
+
+SWITCH(
+
+vrCostCat,
+
+"2+", SUM(FactJob[Cost]),
+
+"PREP", SUM(FactJob[Cost_Preparing]),
+
+"BUILD", SUM(FactJob[Cost_Building]),
+
+"FINISH", SUM(FactJob[Cost_Finishing])
+
+)
+
+RETURN
+
+vrSmartSum
+   
+```
+   
 
  
 
