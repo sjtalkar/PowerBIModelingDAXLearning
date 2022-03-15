@@ -89,16 +89,15 @@ Convert this into a CALCULATE DAX expression and note there is no need for a REL
   ```
     Pct Orders = DIVIDE ([#Orders], [#All Orders])
   ```
-  
-  
-  
-  
-  
-  
-  
+
+  #### Aside : Create a table from a list of elements. The list is by default given the column name Value. Rename it using SELECTCOLUMNS.
 ```  
-  
-  
+  Days = 
+        SELECTCOLUMNS (
+            { 1, 2, 3, 5, 7, 10, 15 },
+            "Days", [Value]
+        )
+```  
   
   
   
