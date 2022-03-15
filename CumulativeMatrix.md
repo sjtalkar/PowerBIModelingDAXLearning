@@ -31,6 +31,8 @@ Note the usage of RELATED since Sales is being filtered but the filter criteria 
 ```
 Convert this into a CALCULATE DAX expression and note there is no need for a RELATED. The calculate will take the context in place, either from row or from a slicer.
   
+  
+  
 ```
   CALCULATE (
               AVERAGEX(
@@ -80,7 +82,6 @@ Convert this into a CALCULATE DAX expression and note there is no need for a REL
             DISTINCTCOUNT( Sales[Order Number] ),
             Store[Name] = "Online Store",
             REMOVEFILTERS(Sales[Delivery Days])
-  
         )
   ```
   
@@ -91,6 +92,8 @@ Convert this into a CALCULATE DAX expression and note there is no need for a REL
   ```
 
   #### Aside : Create a table from a list of elements. The list is by default given the column name Value. Rename it using SELECTCOLUMNS.
+  This table contains the delivery duration days categories required in the matrix. 
+  
 ```  
   Days = 
         SELECTCOLUMNS (
@@ -98,7 +101,51 @@ Convert this into a CALCULATE DAX expression and note there is no need for a REL
             "Days", [Value]
         )
 ```  
+
+  For a cumulative matrix, we need to add up all orders prior to a category of days. For instance Category of Day 1 will contain orders delivered within or before 1 days, Category of Day 2 will contain order delivered within or before 2 days and so on.
   
+  The below DAX picks up orders delivered within 7 days or earlier and computes the number of orders measure seen above (that respects at filter it is used under).
+  
+  ```
+  Delorders = 
+    CALCULATE (
+        [#Orders],
+        Sales[Delivery Days] <= 7
+    )
+  ```                             
+         
+  We now want to iterate over the categories of days and create a measure that uses each of the days and computes the number of orders delivered within or before these days. We cannot use an iteration function but we can grab the ccategory column value in SELECTEDVALUE. We can then dynamically compute the orders prior to a Delivery Days category. 
+   
+To calculate the percentage divide these cumulative orders by teh total number of orders.
+              
+                                
+                                
+```                                
+Del AM   =
+VAR DelDays = SELECTEDVALUE( Days[Days] )
+                                
+VAR Allorders = [#Orders]
+VAR DelordersPerc = 
+    DIVIDE (
+        CALCULATE (
+            [#Orders],
+            Sales[Delivery Days] <= DelDays
+        ),
+        AllOrders 
+    )
+VAR PrevDelDays = CALCULATE ( MAX ( Days[Days] ), Days[Days] < DelDays )
+VAR DelordersPercPrev = 
+    DIVIDE (
+        CALCULATE (
+            [#Orders],
+            Sales[Delivery Days] <= PrevDelDays
+        ),
+        AllOrders 
+    )
+RETURN IF ( DelOrdersPercPrev < 1, DelOrdersPerc )
+```                                
+                                
+                                
   
   
   
