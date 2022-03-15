@@ -8,23 +8,59 @@ A calculated column has access to each element in a row. While in a measure plac
   
 To convert a foumal such as INT(Sales[Deliver Date] - Sales[Order Date]) from a calculated column, where every row has a delivery date and an order date, in a measure, since we do not have individual rows, we have to use a iterator that WILL provide us with access to each row, such as AVERAGEX, or SUMX...
 
+```
 MEASURE_2 = SUMX(Sales,
                INT(Sales[Deliver Date] - Sales[Order Date])
             ) 
-  
+``` 
   
 ### Filter contexts with FILTER and advantages of replacing it with CALCULATE
   
 Note the usage of RELATED since Sales is being filtered but the filter criteria comes from Stores table   
-Average delivery days = 
+
+```
+  Average delivery days = 
      AVERAGEX ( 
         FILTER ( 
             Sales,
-            RELATED'Store'[Name] = "Online store"
+            RELATED('Store'[Name]) = "Online store"
         ),
         Sales[Delivery Date] - Sales[Order Date] 
     )
   
+```
+Convert this into a CALCULATE DAX expression and note there is no need for a RELATED. The calculate will take the context in place, either from row or from a slicer.
   
+```
+  CALCULATE (
+              AVERAGEX(
+                    Sales
+                    Sales[Delivery Date] - Sales[Order Date] 
+              )
+              'Store'[Name] = "Online store"
+  )
+```            
+
+### What if the order we are averaging over, contains multiple number of order items?
+  - Then the above would be incorrect and we will need to remove the line item granularity.
+  - For an order with all items having the same order and delivery date, the below will work
+ 
+```  
+ Avg Delivery (days) = 
+                CALCULATE (
+                    AVERAGEX ( 
+                        SUMMARIZE ( 
+                            Sales,
+                            Sales[Order Number],
+                            Sales[Order Date],
+                            Sales[Delivery Date]
+                        ),
+                        Sales[Delivery Date] - Sales[Order Date] 
+                    ),
+                    'Store'[Name] = "Online store"
+                ) 
+```
+
+
   
   
