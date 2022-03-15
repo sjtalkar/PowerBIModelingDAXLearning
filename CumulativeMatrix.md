@@ -61,6 +61,48 @@ Convert this into a CALCULATE DAX expression and note there is no need for a REL
                 ) 
 ```
 
+  Now if we create a filter based on duration (number of days betwen delivery and order dates), for each categorical number of days, we meed an order count.
+  So create a measure:
+ ```
+    #Orders = 
+        CALCULATE ( 
+            DISTINCTCOUNT( Sales[Order Number] ),
+            Store[Name] = "Online Store"
+        )
+ ``` 
+```
+  #All Orders = CALCULATE (DISTINCTCOUNT(Sales[Order Number]), ALL())
+  
+  OR if we are considering the above #Orders as being against the categorical duartions, remove the duration filter
+  
+  #All Orders = 
+        CALCULATE ( 
+            DISTINCTCOUNT( Sales[Order Number] ),
+            Store[Name] = "Online Store",
+            REMOVEFILTERS(Sales[Delivery Days])
+  
+        )
+  ```
+  
+  To get a percentage : divide the number of order by the number of all orders
+  
+  ```
+    Pct Orders = DIVIDE ([#Orders], [#All Orders])
+  ```
+  
+  
+  
+  
+  
+  
+  
+```  
+  
+  
+  
+  
+  
+  
 
   
   
