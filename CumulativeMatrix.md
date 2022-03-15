@@ -1,4 +1,6 @@
-## Converting a calculated column formula to a measure 
+## Cumulative matrix
+
+### Converting a calculated column formula to a measure 
 
 [WATCH](https://www.youtube.com/watch?v=f5IdCDF1fj4)
 
@@ -9,4 +11,20 @@ To convert a foumal such as INT(Sales[Deliver Date] - Sales[Order Date]) from a 
 MEASURE_2 = SUMX(Sales,
                INT(Sales[Deliver Date] - Sales[Order Date])
             ) 
+  
+  
+### Filter contexts with FILTER and advantages of replacing it with CALCULATE
+  
+Note the usage of RELATED since Sales is being filtered but the filter criteria comes from Stores table   
+Average delivery days = 
+     AVERAGEX ( 
+        FILTER ( 
+            Sales,
+            RELATED'Store'[Name] = "Online store"
+        ),
+        Sales[Delivery Date] - Sales[Order Date] 
+    )
+  
+  
+  
   
