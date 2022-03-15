@@ -3,6 +3,7 @@
 ### Converting a calculated column formula to a measure 
 
 [WATCH](https://www.youtube.com/watch?v=f5IdCDF1fj4)
+[PBIX](https://github.com/sjtalkar/PowerBIModelingDAXLearning/blob/main/Beginner%20guide%20to%20DAX%20by%20examples%20(Final).pbix)
 
 A calculated column has access to each element in a row. While in a measure placing a CALCULATE prior to an aggregation such as SUM or a MAX, **without any filters** is redundant, as in MEASURE_1 = CALCULATE(SUM(<column name>)), in a calculated column, if you want to derive the "group" max, you HAVE to include the CALCULATE.
   
