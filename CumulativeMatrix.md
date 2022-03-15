@@ -145,7 +145,7 @@ VAR DelordersPercPrev =
     )
 RETURN IF ( DelOrdersPercPrev < 1, DelOrdersPerc )
 ```                                
-The above DAX also display all cumulative values as they add up to 1 and once 1 is reached then repeatendly show 100% in the next set of delivery duration days.                         
+The above DAX also display all cumulative values as they add up to 1 and once 1 is reached then it does not repeatedly show 100% in the next set of delivery duration days.                         
                                 
   
   
