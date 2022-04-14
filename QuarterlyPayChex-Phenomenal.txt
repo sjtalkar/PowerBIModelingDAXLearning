@@ -1,0 +1,272 @@
+let
+    Source = (PaychexPacificKoastPayrollJournalPDF as text, PageNumber as text) =>
+    let
+            Source = Pdf.Tables(File.Contents(PaychexPacificKoastPayrollJournalPDF), [Implementation="1.3"]),
+            this_page = Source{[Id=PageNumber]}[Data],
+
+
+            //There is consistently two header and two footer rows that need to be remoced
+            remove_botttom_three = Table.RemoveLastN(this_page,3),
+            remove_title_and_company_name = Table.Skip(remove_botttom_three,2),
+
+            replace_with_blanks_for_totals = Table.ReplaceValue(remove_title_and_company_name,null,"",Replacer.ReplaceValue,{"Column1", "Column4", "Column5", "Column6"}),
+            //Remove Rows pattern
+            identify_companytotal_rows_to_remove = Table.AddColumn(replace_with_blanks_for_totals, "ROWS_TO_REMOVE", each if Text.StartsWith([Column1], "COMPANY") then "COMPANY" else null),
+            fill_company_totals_down = Table.FillDown(identify_companytotal_rows_to_remove,{"ROWS_TO_REMOVE"}),
+            remove_company_total_row = Table.SelectRows(fill_company_totals_down, each [ROWS_TO_REMOVE] = null),
+            remove_comptot_rows_meta = Table.RemoveColumns(remove_company_total_row,{"ROWS_TO_REMOVE"}),
+            
+
+
+
+            identify_tot_rows_to_remove = Table.AddColumn(remove_comptot_rows_meta, "ROWS_TO_REMOVE", each if Text.Contains([Column4], "EMPLOYEE")  
+                                                                                        or Text.Contains([Column5], "EMPLOYEE")
+                                                                                        or Text.Contains([Column6], "EMPLOYEE")
+                                                                                        then "REMOVE ROW"
+                                                                                        else "KEEP ROW"),
+
+            remove_employee_total_row = Table.SelectRows(identify_tot_rows_to_remove, each ([ROWS_TO_REMOVE] = "KEEP ROW")),
+            remove_tot_rows_meta = Table.RemoveColumns(remove_employee_total_row,{"ROWS_TO_REMOVE"}),
+            
+
+            replace_ID_header = Table.ReplaceValue(remove_tot_rows_meta,"ID","",Replacer.ReplaceText,{"Column1"}),
+            recognize_company_end = Table.ReplaceValue(replace_ID_header,"TOTAL"," END_COMPANY  ",Replacer.ReplaceText,{"Column1"}),
+            recognize_start_company = Table.ReplaceValue(recognize_company_end,"***","START_COMPANY ",Replacer.ReplaceText,{"Column1"}),
+            
+            
+            replace_nulls_with_blanks = Table.ReplaceValue(recognize_start_company,null,"",Replacer.ReplaceValue,{"Column1", "Column3", "Column18", "Column4"}),
+            identify_row_to_keep = Table.AddColumn(replace_nulls_with_blanks, "ROWS_TO_REMOVE", each if 
+                                                                                        Text.Contains([Column1], "**")
+                                                                                        or Text.Contains([Column1], "TOTAL")
+                                                                                        or Text.Contains([Column4], "EMPLOYEE")
+                                                                                        or Text.Contains([Column3], "TOTAL")
+                                                                                        or Text.Contains([Column1], "Person")
+                                                                                        or Text.Contains([Column1], "Transaction")
+                                                                                        or Text.Contains([Column1], "Run Date")   
+                                                                                        or Text.Contains([Column18], "LIABILITY")                                                                  
+                                                                                        then "REMOVE ROW"
+                                                                                        else "KEEP ROW"),
+
+            keep_identified_rows = Table.SelectRows(identify_row_to_keep, each ([ROWS_TO_REMOVE] = "KEEP ROW")),
+            remove_keep_rows_meta = Table.RemoveColumns(keep_identified_rows,{"ROWS_TO_REMOVE"}),
+            add_index_for_self_merge_1 = Table.AddIndexColumn(remove_keep_rows_meta, "Index", 0, 1, Int64.Type),
+            add_index_for_self_merge_2 = Table.AddIndexColumn(add_index_for_self_merge_1, "Index.1", 1, 1, Int64.Type),
+            self_merge = Table.NestedJoin(add_index_for_self_merge_2, {"Index.1"}, add_index_for_self_merge_2, {"Index"}, "add_index_for_self_merge_2", JoinKind.LeftOuter),
+            extract_employee_id = Table.ExpandTableColumn(self_merge, "add_index_for_self_merge_2", {"Column1"}, {"add_index_for_self_merge_2.Column1"}),
+            create_empname_column = Table.AddColumn(extract_employee_id, "EMPLOYEE_NAME", each Text.Select([Column1], {"A".."Z", "a".."z", ",", "-"})),
+            identify_id_column = Table.RenameColumns(create_empname_column,{{"add_index_for_self_merge_2.Column1", "IDENTIFY_ID"}}),
+            prepare_for_fill_down = Table.ReplaceValue(identify_id_column,"",null,Replacer.ReplaceValue,{"EMPLOYEE_NAME", "IDENTIFY_ID"}),
+            fill_values_down = Table.FillDown(prepare_for_fill_down,{"EMPLOYEE_NAME", "IDENTIFY_ID"}),
+            // Remove rows relating to company total information
+            identify_company_rows = Table.AddColumn(fill_values_down, "ROWS_TO_REMOVE", each if Text.Contains([EMPLOYEE_NAME], "COMPANY") then "REMOVE ROW" else "KEEP ROW"),
+            remove_company_totals = Table.SelectRows(identify_company_rows, each ([ROWS_TO_REMOVE] = "KEEP ROW")),
+            remove_company_meta = Table.RemoveColumns(remove_company_totals,{"ROWS_TO_REMOVE"}),
+            create_empid_column = Table.AddColumn(remove_company_meta, "ID", each if [EMPLOYEE_NAME] = "EMPLOYEENAME" or Text.Contains([IDENTIFY_ID], "COMPANY") then null else Text.Select([IDENTIFY_ID], {"0".."9"})),
+            replace_empid_blanks_with_null = Table.ReplaceValue(create_empid_column,"",null,Replacer.ReplaceValue,{"ID"}),
+            fill_empid_down = Table.FillDown(replace_empid_blanks_with_null,{"ID"}),
+            merge_name_id = Table.CombineColumns(fill_empid_down,{"EMPLOYEE_NAME", "ID"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID"),
+            remove_meta_columns = Table.RemoveColumns(merge_name_id,{"Index", "Index.1", "IDENTIFY_ID", "Column1"}),
+
+            //Move EMPLOYEE_NAME_ID to the beginning
+            with_empname_table_column_names = Table.ColumnNames(remove_meta_columns),
+            reorder_empname_list = List.Combine({{"EMPLOYEE_NAME_ID"},List.FirstN(with_empname_table_column_names,List.Count(with_empname_table_column_names)-1)}),
+            reordered_withemp_table = Table.ReorderColumns(remove_meta_columns,reorder_empname_list),
+            //Transpose the table
+            transpose_table = Table.Transpose(remove_meta_columns),
+            
+
+            
+            #"Replaced Value" = Table.ReplaceValue(transpose_table,null,"",Replacer.ReplaceValue,{"Column4", "Column1", "Column5", "Column6", "Column7", "Column8", "Column9"  }),
+            // Identy a section by its possible subsections. This is required since a page can contain partial info for an individual and will not always start with Social Security
+            //Some pages are read with a lot of empty columns and so check further out
+            identify_sections = Table.AddColumn(#"Replaced Value", "SET_SECTIONS", each if Text.Contains([Column4], "Social") or Text.Contains([Column4], "CA Income Tax")
+                                                                                    or Text.Contains([Column4], "CA Disability") or Text.Contains([Column4], "Fed Income Tax")  
+                                                                                    or Text.Contains([Column5], "Social") or Text.Contains([Column5], "CA Income Tax")
+                                                                                    or Text.Contains([Column5], "CA Disability") or Text.Contains([Column5], "Fed Income Tax")  
+                                                                                    or Text.Contains([Column6], "Social") or Text.Contains([Column6], "CA Income Tax")
+                                                                                    or Text.Contains([Column6], "CA Disability") or Text.Contains([Column6], "Fed Income Tax")  
+                                                                                    or Text.Contains([Column6], "Social") or Text.Contains([Column7], "CA Income Tax")
+                                                                                    or Text.Contains([Column7], "CA Disability") or Text.Contains([Column7], "Fed Income Tax") 
+                                                                                    or Text.Contains([Column8], "Social") or Text.Contains([Column8], "CA Income Tax")
+                                                                                    or Text.Contains([Column8], "CA Disability") or Text.Contains([Column8], "Fed Income Tax") 
+
+                                                                                    then "WITHHOLDINGS" 
+
+                                                                                    else if Text.Contains([Column4], "AFLAC") or Text.Contains([Column4], "Child") 
+                                                                                        or Text.Contains([Column4], "PX")  or Text.Contains([Column4], "S125")
+                                                                                        or Text.Contains([Column5], "AFLAC") or Text.Contains([Column5], "Child") 
+                                                                                        or Text.Contains([Column5], "PX")  or Text.Contains([Column5], "S125")
+                                                                                        or Text.Contains([Column6], "AFLAC") or Text.Contains([Column6], "Child") 
+                                                                                        or Text.Contains([Column6], "PX")  or Text.Contains([Column6], "S125")
+                                                                                        or Text.Contains([Column7], "AFLAC") or Text.Contains([Column7], "Child") 
+                                                                                        or Text.Contains([Column7], "PX")  or Text.Contains([Column7], "S125")
+                                                                                        or Text.Contains([Column8], "AFLAC") or Text.Contains([Column8], "Child") 
+                                                                                        or Text.Contains([Column8], "PX")  or Text.Contains([Column8], "S125")
+
+                                                                                        then "DEDUCTIONS" 
+                                                                                        
+                                                                                    else if [Column1] = "NET PAY" or [Column2] = "ALLOCATIONS" 
+                                                                                        or Text.Contains([Column4], "Check Amt") or Text.Contains([Column4], "Chkg") 
+                                                                                        or Text.Contains([Column5], "Check Amt") or Text.Contains([Column5], "Chkg") 
+                                                                                        or Text.Contains([Column6], "Check Amt") or Text.Contains([Column6], "Chkg") 
+                                                                                        or Text.Contains([Column7], "Check Amt") or Text.Contains([Column7], "Chkg") 
+                                                                                        or Text.Contains([Column8], "Check Amt") or Text.Contains([Column8], "Chkg") 
+                                                                                        or Text.Contains([Column9], "Check Amt") or Text.Contains([Column9], "Chkg") 
+                                                                                        
+                                                                                    then "NET PAY ALLOCATIONS"
+                                                                                    else if Text.Contains([Column1], "EMPLOYEENAME")
+                                                                                    then "EMPLOYEE_NAME_ID" 
+                                                                                    else null),
+            fill_section_down = Table.FillDown(identify_sections,{"SET_SECTIONS"}),
+            replace_hours_earnings = Table.ReplaceValue(fill_section_down,null,"HOURS_EARNINGS",Replacer.ReplaceValue,{"SET_SECTIONS"}),
+            replace_null_with_blanks = Table.ReplaceValue(replace_hours_earnings,null,"",Replacer.ReplaceValue,{"Column1","Column2"}),
+
+
+            //Identify columns that need to merge together with or without a pipe (for header:value)
+            identify_common_cols = Table.AddColumn(replace_null_with_blanks, "COMMON_SECTIONS", each if Text.Contains([Column2], "HOURS")  and Text.Contains([SET_SECTIONS], "HOURS_EARNINGS")  then "HOURS"
+                                else if  Text.Contains([Column2], "EARNINGS")  and Text.Contains([SET_SECTIONS], "HOURS_EARNINGS")  then "EARNINGS"
+                                else if Text.Contains([Column2], "REIMB & OTHER")  and Text.Contains([SET_SECTIONS], "HOURS_EARNINGS")  then "REIMB & OTHER"
+                                else if  Text.Contains([Column2], "ALLOCATIONS")  and Text.Contains([SET_SECTIONS], "NET PAY ALLOCATIONS")  then "NET PAY ALLOCATIONS" 
+                                else [SET_SECTIONS]),
+            #"Replaced Value2" = Table.ReplaceValue(identify_common_cols,"HOURS_EARNINGS",null,Replacer.ReplaceValue,{"COMMON_SECTIONS"}),
+            fill_down = Table.FillDown(#"Replaced Value2",{"COMMON_SECTIONS"}),
+            merge_cols = Table.CombineColumns(fill_down,{"COMMON_SECTIONS", "Column3"},Combiner.CombineTextByDelimiter("", QuoteStyle.None),"MERGE_COMMON_SECTIONS"),
+            remove_meta = Table.RemoveColumns(merge_cols,{"Column1", "SET_SECTIONS", "Column2"}),
+            replaced_with_blank = Table.ReplaceValue(remove_meta,"",null,Replacer.ReplaceValue,{"MERGE_COMMON_SECTIONS"}),
+            filled_section_down = Table.FillDown(replaced_with_blank,{"MERGE_COMMON_SECTIONS"}),
+
+            //identify headers
+            identify_sections_headers = Table.AddColumn(filled_section_down, "SET_SECTION_HEADER",
+                                each if Text.Contains([MERGE_COMMON_SECTIONS], "WITHHOLDINGS") and 
+                                                    (  Text.Contains([Column4], "Social") or Text.Contains([Column4], "CA Income Tax")
+                                                    or Text.Contains([Column4], "CA Disability") or Text.Contains([Column4], "Fed Income Tax")  
+                                                    or Text.Contains([Column5], "Social") or Text.Contains([Column5], "CA Income Tax")
+                                                    or Text.Contains([Column5], "CA Disability") or Text.Contains([Column5], "Fed Income Tax")  
+                                                    or Text.Contains([Column6], "Social") or Text.Contains([Column6], "CA Income Tax")
+                                                    or Text.Contains([Column6], "CA Disability") or Text.Contains([Column6], "Fed Income Tax")  
+                                                    or Text.Contains([Column6], "Social") or Text.Contains([Column7], "CA Income Tax")
+                                                    or Text.Contains([Column7], "CA Disability") or Text.Contains([Column7], "Fed Income Tax") 
+                                                    or Text.Contains([Column8], "Social") or Text.Contains([Column8], "CA Income Tax")
+                                                    or Text.Contains([Column8], "CA Disability") or Text.Contains([Column8], "Fed Income Tax") )
+                                    then "WITHHOLDINGS HEADER" 
+                                else if  Text.Contains([MERGE_COMMON_SECTIONS], "DEDUCTIONS") and  
+                                                    (Text.Contains([Column4], "AFLAC") or Text.Contains([Column4], "Child") 
+                                                    or Text.Contains([Column4], "PX")  or Text.Contains([Column4], "S125")
+                                                    or Text.Contains([Column5], "AFLAC") or Text.Contains([Column5], "Child") 
+                                                    or Text.Contains([Column5], "PX")  or Text.Contains([Column5], "S125")
+                                                    or Text.Contains([Column6], "AFLAC") or Text.Contains([Column6], "Child") 
+                                                    or Text.Contains([Column6], "PX")  or Text.Contains([Column6], "S125")
+                                                    or Text.Contains([Column7], "AFLAC") or Text.Contains([Column7], "Child") 
+                                                    or Text.Contains([Column7], "PX")  or Text.Contains([Column7], "S125")
+                                                    or Text.Contains([Column8], "AFLAC") or Text.Contains([Column8], "Child") 
+                                                    or Text.Contains([Column8], "PX")  or Text.Contains([Column8], "S125"))
+
+                                    then "DEDUCTIONS HEADER"
+                                else if Text.Contains([MERGE_COMMON_SECTIONS], "ALLOCATION") and  
+                                                    (Text.Contains([Column4], "Check") or Text.Contains([Column4], "Chkg") 
+                                                    or Text.Contains([Column5], "Check")  or Text.Contains([Column5], "Chkg")
+                                                    or Text.Contains([Column6], "Check") or Text.Contains([Column6], "Chkg") 
+                                                    or Text.Contains([Column7], "Check") or Text.Contains([Column7], "Chkg")
+                                                    or Text.Contains([Column8], "Check") or Text.Contains([Column8], "Chkg")
+                                                    or Text.Contains([Column9], "Check") or Text.Contains([Column9], "Chkg")
+                                                )
+                                    then  "NET PAY ALLOCATIONS HEADER"    
+                                else [MERGE_COMMON_SECTIONS]),
+
+            curr_table_column_names = Table.ColumnNames(identify_sections_headers),
+            reordered_list = List.Combine({{"SET_SECTION_HEADER"},List.FirstN(curr_table_column_names,List.Count(curr_table_column_names)-1)}),
+            reordered_table = Table.ReorderColumns(identify_sections_headers,reordered_list),
+            #"Removed Columns" = Table.RemoveColumns(reordered_table,{"MERGE_COMMON_SECTIONS"}),
+            rename_extra_top_row = Table.Skip(#"Removed Columns",1),
+            fill_desc_up = Table.FillUp(rename_extra_top_row,{"SET_SECTION_HEADER"}),
+
+
+            table_reflects_repeating_subsections = Table.Transpose(fill_desc_up),
+            #"Filtered Rows" = Table.SelectRows(table_reflects_repeating_subsections, each ([Column6] <> "OTAL") and ([Column19] <> "EmployerLiabilities")),
+            promote_headers = Table.PromoteHeaders(#"Filtered Rows", [PromoteAllScalars=true]),
+            #"Renamed Columns1" = Table.RenameColumns(promote_headers,{{"EMPLOYEE_NAME_IDEMPLOYEENAME|", "EMPLOYEE_NAME_ID"}}),
+            
+            //Determine Columns to merge
+            table_column_names = Table.ColumnNames(#"Renamed Columns1"),
+            desc_list = List.FindText(table_column_names, "DESC"),
+            rate_list = List.FindText(table_column_names, "RATE"),
+            hours_list = List.FindText(table_column_names, "HOURS"),
+            earnings_list = List.FindText(table_column_names, "EARNINGS"),
+            reimb_list = List.FindText(table_column_names, "REIMB"),
+
+            //Separate the column in sections where there is a header column followed by a value column
+            all_withholding_list = List.FindText(table_column_names, "WITHHOLDINGS"),
+            withholding_header_list = List.FindText(table_column_names, "WITHHOLDINGS HEADER"),
+            withholding_list = List.Difference(all_withholding_list, withholding_header_list),
+
+            deductions_header_list = List.FindText(table_column_names, "DEDUCTIONS HEADER"),
+            all_deductions_list = List.FindText(table_column_names, "DEDUCTIONS"),
+            deductions_list = List.Difference(all_deductions_list, deductions_header_list),
+
+            all_netallocation = List.FindText(table_column_names, "NET PAY"),
+            netallocation_header_list = List.FindText(table_column_names, "NET PAY ALLOCATIONS HEADER"),
+            netallocation_list = List.Difference(all_netallocation, netallocation_header_list),
+
+
+            merge_desc = Table.CombineColumns(#"Renamed Columns1",desc_list,Combiner.CombineTextByDelimiter("", QuoteStyle.None),"DESCRIPTIONS"),
+            merge_rate = Table.CombineColumns(merge_desc,rate_list,Combiner.CombineTextByDelimiter("", QuoteStyle.None),"RATES"),
+            merge_hours = Table.CombineColumns(merge_rate,hours_list,Combiner.CombineTextByDelimiter("", QuoteStyle.None),"HOURS"),
+            merge_earnings = Table.CombineColumns(merge_hours,earnings_list,Combiner.CombineTextByDelimiter("", QuoteStyle.None),"EARNINGS"),
+            merge_reimb = Table.CombineColumns(merge_earnings,reimb_list,Combiner.CombineTextByDelimiter("", QuoteStyle.None),"REIMB & OTHER"),
+
+            merge_withholding = Table.CombineColumns(merge_reimb, withholding_list, Combiner.CombineTextByDelimiter("", QuoteStyle.None),"WITHHOLDINGS"),
+            new_withholdings = List.Combine({withholding_header_list, {"WITHHOLDINGS"}}),
+            merge_withholding_header = Table.CombineColumns(merge_withholding,new_withholdings, Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"WITHHOLDINGS"),
+            
+
+
+            merge_deductions = Table.CombineColumns(merge_withholding_header,deductions_list,Combiner.CombineTextByDelimiter("", QuoteStyle.None),"DEDUCTIONS"),
+            new_deductions = List.Combine({deductions_header_list, {"DEDUCTIONS"}}),
+            merge_deductions_header = Table.CombineColumns(merge_deductions,new_deductions, Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"DEDUCTIONS"),
+        
+            merge_netallocation = Table.CombineColumns(merge_deductions_header,netallocation_list,Combiner.CombineTextByDelimiter("", QuoteStyle.None),"NET_ALLOCATIONS"),
+            new_allocations = List.Combine({netallocation_header_list, {"NET_ALLOCATIONS"}}),
+            merge_allocations_header = Table.CombineColumns(merge_netallocation,new_allocations, Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"NET_ALLOCATIONS"),
+            
+            
+            merge_hours_earnings = Table.CombineColumns(merge_allocations_header,{"DESCRIPTIONS", "RATES", "HOURS", "EARNINGS"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"HOURS & EARNINGS"),
+            unpivot_other_columns = Table.UnpivotOtherColumns(merge_hours_earnings, {"EMPLOYEE_NAME_ID"}, "Attribute", "Value"),
+            split_columns_by_pipe = Table.SplitColumn(unpivot_other_columns, "EMPLOYEE_NAME_ID", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"EMPLOYEE_NAME_ID.1", "EMPLOYEE_NAME_ID.2"}),
+            split_columns_by_pipe1 = Table.SplitColumn(split_columns_by_pipe, "Value", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"Value.1", "Value.2", "Value.3", "Value.4"}),
+            #"Renamed Columns" = Table.RenameColumns(split_columns_by_pipe1,{{"Value.1", "Description"}, {"Value.2", "Rate"}, {"Value.3", "Hours"}, {"Value.4", "Earnings"}}),
+            #"Sorted Rows" = Table.Sort(#"Renamed Columns",{{"EMPLOYEE_NAME_ID.1", Order.Ascending}, {"Attribute", Order.Ascending}}),
+            remove_blank_rows = Table.SelectRows(#"Sorted Rows", each ([Description] <> "")),
+            set_final_column_headers = Table.RenameColumns(remove_blank_rows,{{"Attribute", "SECTION"}, {"Description", "SUBSECTION"}, {"Rate", "SUBSECTION VALUE/RATE"}, {"EMPLOYEE_NAME_ID.1", "EMPLOYEE_NAME"}, {"EMPLOYEE_NAME_ID.2", "EMPLOYEE_ID"}, {"Hours", "HOURS"}, {"Earnings", "EARNINGS"}}),
+            replace_space_in_values = Table.ReplaceValue(set_final_column_headers," ","",Replacer.ReplaceText,{"SUBSECTION VALUE/RATE", "HOURS", "EARNINGS"})
+    in
+        replace_space_in_values
+in
+    Source
+	
+	
+	
+let
+    Source = (PaychexPacificKoastPayrollJournalPDF as text, PageNumber as text) =>
+let
+    // Source = Pdf.Tables(File.Contents(PayrollFileNameToProcess), [Implementation="1.3"]),
+    // filter_to_pages = Table.SelectRows(Source, each ([Kind] = "Page")),
+    // add_file_name = Table.AddColumn(filter_to_pages, "Payroll Journal File Name", each PayrollFileNameToProcess),
+    // keep_file_name_and_page = Table.SelectColumns(add_file_name,{"Payroll Journal File Name", "Name"}),
+
+    read_source = Pdf.Tables(File.Contents(PaychexPacificKoastPayrollJournalPDF), [Implementation="1.3"]),
+    this_page = read_source{[Id=PageNumber]}[Data],
+    //Check if there is any employee related info in the page, if not we need to stop execution and create table with no rows
+    row_count = Table.RowCount(this_page),
+    employee_name_list = Table.Column(this_page, "Column1"),
+    find_employee_list = List.FindText(employee_name_list, ","),
+    count_employees = List.Count(find_employee_list),
+    identify_tot_rows_to_remove =  if count_employees = 0 then  Table.FromRecords({[Column1="REMOVE ROW"]})
+                                                                else Table.FromRecords({[Column1="KEEP ROW"]})
+    
+   // #"Expanded ROWS_TO_REMOVE" = Table.ExpandTableColumn(identify_tot_rows_to_remove, "ROWS_TO_REMOVE", {"Column1"}, {"Column1"})
+
+
+in
+    identify_tot_rows_to_remove
+in 
+    Source	

@@ -1,0 +1,398 @@
+/********************************Works on Page 2 *************************************************************************************************/
+let
+    
+    Source = Pdf.Tables(File.Contents("G:\My Drive\BBSI\Paychex Year to Date Report.pdf"), [Implementation="1.3"]),
+    page_table = Source{[Id="Page006"]}[Data],
+
+    // create a table combining employee names with ids that is available in Page 1 of the report 
+    empname_id_table = Source{[Id="Table001"]}[Data],
+    set_headers = Table.PromoteHeaders(empname_id_table, [PromoteAllScalars=true]),
+    merge_first_two = Table.CombineColumns(set_headers,{"EMPLOYEE NAME", "ID"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID"),
+    merge_second_two = Table.CombineColumns(merge_first_two,{"EMPLOYEE NAME_1", "ID_2"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID.1"),
+    merge_third_two = Table.CombineColumns(merge_second_two,{"EMPLOYEE NAME_3", "ID_4"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID.2"),
+    merge_fourth_two = Table.CombineColumns(merge_third_two,{"EMPLOYEE NAME_5", "ID_6"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID.3"),
+    unpivot_all = Table.Unpivot(merge_fourth_two, {"EMPLOYEE_NAME_ID", "EMPLOYEE_NAME_ID.1", "EMPLOYEE_NAME_ID.2", "EMPLOYEE_NAME_ID.3"}, "Attribute", "Value"),
+    separate_empname_id = Table.SplitColumn(unpivot_all, "Value", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"Value.1", "Value.2"}),
+    set_column_header_names = Table.RenameColumns(separate_empname_id,{{"Value.1", "EMPLOYEE_NAME"}, {"Value.2", "ID"}}),
+    empname_id_final = Table.RemoveColumns(set_column_header_names,{"Attribute"}),
+    //Completed creating employee name id mapping
+
+
+    //Begin with top and bottom tables on page
+    clean_nulls = Table.ReplaceValue(page_table,null,"",Replacer.ReplaceValue,{"Column1", "Column2", "Column3", "Column4", "Column5", "Column6", "Column7"}),
+    remove_top_two_rows = Table.Skip(clean_nulls,2),
+    keep_name_socsec_rows = Table.RemoveLastN(remove_top_two_rows,5),
+    replace_null_with_blanks_for_logical = Table.ReplaceValue(keep_name_socsec_rows,null,"",Replacer.ReplaceValue,{"Column1"}),
+    
+    //The PDFS are read so that either Column1 or Column2 contains the name. Figure out the column that carries the name
+    column1_values = Table.Column(replace_null_with_blanks_for_logical, "Column1"),
+    column2_values = Table.Column(replace_null_with_blanks_for_logical, "Column2"),
+    column_containing_name = if List.Count(List.FindText(column1_values, ",")) > 0 then "Column1" else "Column2",
+
+    distinguish_employee_name = Table.AddColumn(replace_null_with_blanks_for_logical, "EMPLOYEE NAME", each if Text.Contains(Record.Field(_, column_containing_name), ",") and (Text.Contains([Column3], "ID") or Text.Contains([Column4], "ID") ) then Record.Field(_, column_containing_name) else null),
+    
+    
+    
+    fill_empname_down = Table.FillDown(distinguish_employee_name,{"EMPLOYEE NAME"}),
+    separate_into_top_and_bottom = Table.AddColumn(fill_empname_down, "IDENTIFY_TOP_BOTTOM", each if [EMPLOYEE NAME] is null then "TOPTABLE" else "BOTTOMTABLE"),
+    fill_empname_up = Table.FillUp(separate_into_top_and_bottom,{"EMPLOYEE NAME"}),
+    
+    //The column that carries the name typically carries the social security as well
+    distinguish_soc_sec = Table.AddColumn(fill_empname_up, "SOCIAL SECURITY", each if Text.Contains(Record.Field(_, column_containing_name), "Soc Sec#")  then Record.Field(_, column_containing_name) else null),
+    fill_social_sec_up = Table.FillUp(distinguish_soc_sec,{"SOCIAL SECURITY"}),
+    fill_social_sec_down = Table.FillDown(fill_social_sec_up,{"SOCIAL SECURITY"}),
+    
+    
+    
+    //Identify the top and bottom halves
+    top_table =  Table.SelectRows(fill_social_sec_down, each ([IDENTIFY_TOP_BOTTOM] = "TOPTABLE")),
+    start_of_period_total = List.PositionOf(Table.Column(top_table, "Column1"), "This"),
+    table_num_rows = Table.RowCount(top_table), 
+    remove_period_total = Table.RemoveLastN(top_table,table_num_rows - start_of_period_total),
+    
+    
+    
+    bottom_table =  Table.SelectRows(fill_social_sec_down, each ([IDENTIFY_TOP_BOTTOM] = "BOTTOMTABLE")),
+   
+    
+    remove_meta_columns = Table.RemoveColumns(remove_period_total,{"IDENTIFY_TOP_BOTTOM"}),
+    fill_check_date_down = Table.FillDown(remove_meta_columns,{"Column1"}),
+    distinguish_check_empname_rows = Table.AddColumn(fill_check_date_down, "EMPLOYEE_DETAILS_1", each if Text.Contains([Column1], "CHECK") then "EMPLOYEE" else if Text.Contains([Column1], ",") then [EMPLOYEE NAME] else null),
+    merge_with_master_empnameid = Table.NestedJoin(distinguish_check_empname_rows, {"EMPLOYEE NAME"}, empname_id_final, {"EMPLOYEE_NAME"}, "DETECT_EMPID", JoinKind.LeftOuter),
+    expand_DETECT_EMPID = Table.ExpandTableColumn(merge_with_master_empnameid, "DETECT_EMPID", {"ID"}, {"ID"}),
+    add_emppii_details = Table.AddColumn(expand_DETECT_EMPID, "EMPLOYEE_PII", each "EMPLOYEE_PII_DETAILS"),
+    employee_pii = Table.CombineColumns(add_emppii_details,{"EMPLOYEE_PII", "EMPLOYEE NAME", "SOCIAL SECURITY", "ID"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_PII"),
+    identify_emp_header_rows = Table.FillUp(employee_pii,{"EMPLOYEE_DETAILS_1"}),
+    replace_emp_header_column_with_blanks = Table.ReplaceValue(identify_emp_header_rows,null,"",Replacer.ReplaceValue,{"EMPLOYEE_DETAILS_1"}),
+    create_column_with_header_pii = Table.AddColumn(replace_emp_header_column_with_blanks, "Custom", each if [EMPLOYEE_DETAILS_1] = "EMPLOYEE" then "EMPLOYEE" else [EMPLOYEE_PII]),
+    set_emp_column_header = Table.RenameColumns(create_column_with_header_pii,{{"Custom", "EMPLOYEE"}}),
+    remove_emp_meta_columns = Table.RemoveColumns(set_emp_column_header,{"EMPLOYEE_DETAILS_1", "EMPLOYEE_PII"}),
+    merge_pii_with_dates = Table.CombineColumns(remove_emp_meta_columns,{"EMPLOYEE", "Column1"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_CHECKDATE"),
+    make_headers_similar = Table.ReplaceValue(merge_pii_with_dates,"EMPLOYEE|CHECK","EMPLOYEE|",Replacer.ReplaceText,{"EMPLOYEE_CHECKDATE"}),
+    transpose_table = Table.Transpose(make_headers_similar),
+    replace_col2_null_with_blanks = Table.ReplaceValue(transpose_table,null,"",Replacer.ReplaceValue,{"Column1","Column2", "Column3", "Column4"}),
+
+    identify_sections = Table.AddColumn(replace_col2_null_with_blanks, "SET_SECTIONS",
+                                                                                    each if (Text.Contains([Column3], "OTHER") and  Text.Contains([Column4], "PAYMENTS"))
+                                                                                    or (Text.Contains([Column4], "OTHER") and Text.Contains([Colum52], "PAYMENTS"))
+                                                                                    then "HOURS_EARNINGS" 
+                                                                                    else if Text.Contains([Column2], "SOC SEC") or Text.Contains([Column2], "FEDERAL")
+                                                                                    or Text.Contains([Column2], "STATE") or Text.Contains([Column2], "LOCAL")  or Text.Contains([Column2], "OTHER")
+                                                                                    or Text.Contains([Column3], "SOC SEC") or Text.Contains([Column3], "FEDERAL")
+                                                                                    or Text.Contains([Column3], "STATE") or Text.Contains([Column3], "LOCAL")  or Text.Contains([Column3], "OTHER")
+                                                                                    or Text.Contains([Column4], "SOC SEC") or Text.Contains([Column4], "FEDERAL")
+                                                                                    or Text.Contains([Column4], "STATE") or Text.Contains([Column4], "LOCAL")  or Text.Contains([Column4], "OTHER")
+
+                                                                                    then "WITHHOLDINGS" 
+
+                                                                                    else if Text.Contains([Column4], "PX") or Text.Contains([Column4], "TO-PIA") 
+                                                                                         or Text.Contains([Column3], "PX") or Text.Contains([Column3], "TO-PIA") 
+                                                                                         or Text.Contains([Column2], "PX") or Text.Contains([Column2], "TO-PIA") 
+
+                                                                                        then "DEDUCTIONS" 
+                                                                                        
+                                                                                    else if Text.Contains([Column1], "NET") or Text.Contains([Column2], "PAY") 
+                                                                                        or Text.Contains([Column2], "PAY") 
+                                                                                    then "NET PAY ALLOCATIONS"
+                                                                                    else if Text.Contains([Column1], "EMPLOYEE")
+                                                                                    then "EMPLOYEE_PII" 
+
+                                                                                    else null),
+    fill_sections_up = Table.FillUp(identify_sections,{"SET_SECTIONS"}),
+    fill_sections_down = Table.FillDown(fill_sections_up,{"SET_SECTIONS"}),
+
+
+    curr_table_columns = Table.ColumnNames(fill_sections_down),
+    columns_other_than_setsections = List.Difference(curr_table_columns, {"SET_SECTIONS", "Column1"}),
+    final_columns = List.Combine({{"SET_SECTIONS"}, columns_other_than_setsections}),
+    reordered_table = Table.ReorderColumns(fill_sections_down, final_columns),
+    remove_first_column = Table.RemoveColumns(reordered_table,{"Column1"}),
+    merge_subsections = Table.CombineColumns(remove_first_column,{"Column2", "Column3", "Column4"},Combiner.CombineTextByDelimiter(" ", QuoteStyle.None),"SUBSECTION"),
+    
+
+    remove_employee_name_from_header = Table.AddColumn(merge_subsections, "SUBSECTION HEADERS", each if Text.Contains([SUBSECTION], "EMPLOYEE") 
+                                                                                                    then "EMPLOYEE"
+                                                                                                    else [SUBSECTION]),
+
+
+    //Bring the newly created column to the front
+    curr_table_col_list = Table.ColumnNames(remove_employee_name_from_header),
+    new_column_order =   List.Combine({{"SUBSECTION HEADERS"}, List.Difference(curr_table_col_list,{"SUBSECTION HEADERS"})}),
+    reordered_table_with_new_subsection = Table.ReorderColumns(remove_employee_name_from_header, new_column_order),
+    remove_original_subsection = Table.RemoveColumns(reordered_table_with_new_subsection,{"SUBSECTION"}),
+    
+
+    merge_section_with_subsection = Table.CombineColumns(remove_original_subsection,{"SET_SECTIONS", "SUBSECTION HEADERS"},Combiner.CombineTextByDelimiter(":", QuoteStyle.None),"SECTION:SUBSECTION"),
+    transpose_table_back = Table.Transpose(merge_section_with_subsection),
+    set_first_row_as_header = Table.PromoteHeaders(transpose_table_back, [PromoteAllScalars=true]),
+    hours_earnings_list = List.FindText(Table.ColumnNames(set_first_row_as_header), "HOURS_EARNINGS" ),
+
+    merge_all_hours_earnings = Table.CombineColumns(set_first_row_as_header, hours_earnings_list,Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"HOURS_EARNINGS"),
+    
+    #"Unpivoted Other Columns" = Table.UnpivotOtherColumns(merge_all_hours_earnings, {"EMPLOYEE_PII:EMPLOYEE"}, "Attribute", "Value"),
+    section_subsection_headers = Table.RenameColumns(#"Unpivoted Other Columns",{{"Attribute", "SECTION_SUBSECTION"}, {"Value", "SUBSECTION_VALUE"}}),
+    sort_rows = Table.Sort(section_subsection_headers,{{"SECTION_SUBSECTION", Order.Ascending}}),
+    split_pii = Table.SplitColumn(sort_rows, "EMPLOYEE_PII:EMPLOYEE", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"EMPLOYEE_PII:EMPLOYEE.1", "EMPLOYEE_PII:EMPLOYEE.2", "EMPLOYEE_PII:EMPLOYEE.3", "EMPLOYEE_PII:EMPLOYEE.4", "EMPLOYEE_PII:EMPLOYEE.5"}),
+    split_subsection_values = Table.SplitColumn(split_pii, "SUBSECTION_VALUE", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"SUBSECTION_VALUE.1", "SUBSECTION_VALUE.2", "SUBSECTION_VALUE.3", "SUBSECTION_VALUE.4", "SUBSECTION_VALUE.5", "SUBSECTION_VALUE.6", "SUBSECTION_VALUE.7", "SUBSECTION_VALUE.8", "SUBSECTION_VALUE.9"}),
+    remove_pii_header = Table.RemoveColumns(split_subsection_values,{"EMPLOYEE_PII:EMPLOYEE.1"})
+in
+    remove_pii_header
+
+/**************************************** Works on Page 6 *****************************************************************************************/
+let
+    
+    Source = Pdf.Tables(File.Contents("G:\My Drive\BBSI\Paychex Year to Date Report.pdf"), [Implementation="1.3"]),
+    page_table = Source{[Id="Page006"]}[Data],
+
+    // create a table combining employee names with ids that is available in Page 1 of the report 
+    empname_id_table = Source{[Id="Table001"]}[Data],
+    set_headers = Table.PromoteHeaders(empname_id_table, [PromoteAllScalars=true]),
+    merge_first_two = Table.CombineColumns(set_headers,{"EMPLOYEE NAME", "ID"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID"),
+    merge_second_two = Table.CombineColumns(merge_first_two,{"EMPLOYEE NAME_1", "ID_2"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID.1"),
+    merge_third_two = Table.CombineColumns(merge_second_two,{"EMPLOYEE NAME_3", "ID_4"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID.2"),
+    merge_fourth_two = Table.CombineColumns(merge_third_two,{"EMPLOYEE NAME_5", "ID_6"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID.3"),
+    unpivot_all = Table.Unpivot(merge_fourth_two, {"EMPLOYEE_NAME_ID", "EMPLOYEE_NAME_ID.1", "EMPLOYEE_NAME_ID.2", "EMPLOYEE_NAME_ID.3"}, "Attribute", "Value"),
+    separate_empname_id = Table.SplitColumn(unpivot_all, "Value", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"Value.1", "Value.2"}),
+    set_column_header_names = Table.RenameColumns(separate_empname_id,{{"Value.1", "EMPLOYEE_NAME"}, {"Value.2", "ID"}}),
+    empname_id_final = Table.RemoveColumns(set_column_header_names,{"Attribute"}),
+    //Completed creating employee name id mapping
+
+
+    //Begin with top and bottom tables on page
+    clean_nulls = Table.ReplaceValue(page_table,null,"",Replacer.ReplaceValue,{"Column2", "Column4", "Column5", "Column6", "Column7"}),
+    remove_top_two_rows = Table.Skip(clean_nulls,2),
+    keep_name_socsec_rows = Table.RemoveLastN(remove_top_two_rows,5),
+    replace_null_with_blanks_for_logical = Table.ReplaceValue(keep_name_socsec_rows,null,"",Replacer.ReplaceValue,{"Column1"}),
+    
+    //The PDFS are read so that either Column1 or Column2 contains the name. Figure out the column that carries the name
+    column1_values = Table.Column(replace_null_with_blanks_for_logical, "Column1"),
+    column2_values = Table.Column(replace_null_with_blanks_for_logical, "Column2"),
+    column_containing_name = if List.Count(List.FindText(column1_values, ",")) > 0 then "Column1" else "Column2",
+    
+    distinguish_employee_name = Table.AddColumn(replace_null_with_blanks_for_logical, "EMPLOYEE NAME", each if Text.Contains(Record.Field(_, column_containing_name), ",") then Record.Field(_, column_containing_name) else null),
+    
+    
+    
+    fill_empname_down = Table.FillDown(distinguish_employee_name,{"EMPLOYEE NAME"}),
+    separate_into_top_and_bottom = Table.AddColumn(fill_empname_down, "IDENTIFY_TOP_BOTTOM", each if [EMPLOYEE NAME] is null then "TOPTABLE" else "BOTTOMTABLE"),
+    fill_empname_up = Table.FillUp(separate_into_top_and_bottom,{"EMPLOYEE NAME"}),
+    
+    //The column that carries the name typically carries the social security as well
+    distinguish_soc_sec = Table.AddColumn(fill_empname_up, "SOCIAL SECURITY", each if Text.Contains(Record.Field(_, column_containing_name), "Soc Sec#")  then Record.Field(_, column_containing_name) else null),
+    fill_social_sec_up = Table.FillUp(distinguish_soc_sec,{"SOCIAL SECURITY"}),
+    fill_social_sec_down = Table.FillDown(fill_social_sec_up,{"SOCIAL SECURITY"}),
+    
+    
+    
+    //Identify the top and bottom halves
+    top_table =  Table.SelectRows(fill_social_sec_down, each ([IDENTIFY_TOP_BOTTOM] = "TOPTABLE")),
+    bottom_table =  Table.SelectRows(fill_social_sec_down, each ([IDENTIFY_TOP_BOTTOM] = "BOTTOMTABLE")),
+   
+    
+    remove_meta_columns = Table.RemoveColumns(top_table,{"IDENTIFY_TOP_BOTTOM"}),
+    fill_check_date_down = Table.FillDown(remove_meta_columns,{"Column1"}),
+    distinguish_check_empname_rows = Table.AddColumn(fill_check_date_down, "EMPLOYEE_DETAILS_1", each if Text.Contains([Column1], "CHECK") then "EMPLOYEE" else if Text.Contains([Column1], ",") then [EMPLOYEE NAME] else null),
+    merge_with_master_empnameid = Table.NestedJoin(distinguish_check_empname_rows, {"EMPLOYEE NAME"}, empname_id_final, {"EMPLOYEE_NAME"}, "DETECT_EMPID", JoinKind.LeftOuter),
+    expand_DETECT_EMPID = Table.ExpandTableColumn(merge_with_master_empnameid, "DETECT_EMPID", {"ID"}, {"ID"}),
+    add_emppii_details = Table.AddColumn(expand_DETECT_EMPID, "EMPLOYEE_PII", each "EMPLOYEE_PII_DETAILS"),
+    employee_pii = Table.CombineColumns(add_emppii_details,{"EMPLOYEE_PII", "EMPLOYEE NAME", "SOCIAL SECURITY", "ID"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_PII"),
+    identify_emp_header_rows = Table.FillUp(employee_pii,{"EMPLOYEE_DETAILS_1"}),
+    replace_emp_header_column_with_blanks = Table.ReplaceValue(identify_emp_header_rows,null,"",Replacer.ReplaceValue,{"EMPLOYEE_DETAILS_1"}),
+    create_column_with_header_pii = Table.AddColumn(replace_emp_header_column_with_blanks, "Custom", each if [EMPLOYEE_DETAILS_1] = "EMPLOYEE" then "EMPLOYEE" else [EMPLOYEE_PII]),
+    set_emp_column_header = Table.RenameColumns(create_column_with_header_pii,{{"Custom", "EMPLOYEE"}}),
+    remove_emp_meta_columns = Table.RemoveColumns(set_emp_column_header,{"EMPLOYEE_DETAILS_1", "EMPLOYEE_PII"}),
+    merge_pii_with_dates = Table.CombineColumns(remove_emp_meta_columns,{"EMPLOYEE", "Column1"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_CHECKDATE"),
+    make_headers_similar = Table.ReplaceValue(merge_pii_with_dates,"EMPLOYEE|CHECK","EMPLOYEE|",Replacer.ReplaceText,{"EMPLOYEE_CHECKDATE"}),
+    remove_period_total = Table.RemoveLastN(make_headers_similar,2),
+    transpose_table = Table.Transpose(remove_period_total),
+    replace_col2_null_with_blanks = Table.ReplaceValue(transpose_table,null,"",Replacer.ReplaceValue,{"Column1","Column2", "Column3", "Column4"}),
+
+    identify_sections = Table.AddColumn(replace_col2_null_with_blanks, "SET_SECTIONS",
+                                                                                    each if (Text.Contains([Column3], "OTHER") and  Text.Contains([Column4], "PAYMENTS"))
+                                                                                    or (Text.Contains([Column4], "OTHER") and Text.Contains([Colum52], "PAYMENTS"))
+                                                                                    then "HOURS_EARNINGS" 
+                                                                                    else if Text.Contains([Column2], "SOC SEC") or Text.Contains([Column2], "FEDERAL")
+                                                                                    or Text.Contains([Column2], "STATE") or Text.Contains([Column2], "LOCAL")  or Text.Contains([Column2], "OTHER")
+                                                                                    or Text.Contains([Column3], "SOC SEC") or Text.Contains([Column3], "FEDERAL")
+                                                                                    or Text.Contains([Column3], "STATE") or Text.Contains([Column3], "LOCAL")  or Text.Contains([Column3], "OTHER")
+                                                                                    or Text.Contains([Column4], "SOC SEC") or Text.Contains([Column4], "FEDERAL")
+                                                                                    or Text.Contains([Column4], "STATE") or Text.Contains([Column4], "LOCAL")  or Text.Contains([Column4], "OTHER")
+
+                                                                                    then "WITHHOLDINGS" 
+
+                                                                                    else if Text.Contains([Column4], "PX") or Text.Contains([Column4], "TO-PIA") 
+                                                                                         or Text.Contains([Column3], "PX") or Text.Contains([Column3], "TO-PIA") 
+                                                                                         or Text.Contains([Column2], "PX") or Text.Contains([Column2], "TO-PIA") 
+
+                                                                                        then "DEDUCTIONS" 
+                                                                                        
+                                                                                    else if Text.Contains([Column1], "NET") or Text.Contains([Column2], "PAY") 
+                                                                                        or Text.Contains([Column2], "PAY") 
+                                                                                    then "NET PAY ALLOCATIONS"
+                                                                                    else if Text.Contains([Column1], "EMPLOYEE")
+                                                                                    then "EMPLOYEE_PII" 
+
+                                                                                    else null),
+    fill_sections_up = Table.FillUp(identify_sections,{"SET_SECTIONS"}),
+    fill_sections_down = Table.FillDown(fill_sections_up,{"SET_SECTIONS"}),
+
+
+    curr_table_columns = Table.ColumnNames(fill_sections_down),
+    columns_other_than_setsections = List.Difference(curr_table_columns, {"SET_SECTIONS", "Column1"}),
+    final_columns = List.Combine({{"SET_SECTIONS"}, columns_other_than_setsections}),
+    reordered_table = Table.ReorderColumns(fill_sections_down, final_columns),
+    remove_first_column = Table.RemoveColumns(reordered_table,{"Column1"}),
+    merge_subsections = Table.CombineColumns(remove_first_column,{"Column2", "Column3", "Column4"},Combiner.CombineTextByDelimiter(" ", QuoteStyle.None),"SUBSECTION"),
+    
+
+    remove_employee_name_from_header = Table.AddColumn(merge_subsections, "SUBSECTION HEADERS", each if Text.Contains([SUBSECTION], "EMPLOYEE") 
+                                                                                                    then "EMPLOYEE"
+                                                                                                    else [SUBSECTION]),
+
+
+    //Bring the newly created column to the front
+    curr_table_col_list = Table.ColumnNames(remove_employee_name_from_header),
+    new_column_order =   List.Combine({{"SUBSECTION HEADERS"}, List.Difference(curr_table_col_list,{"SUBSECTION HEADERS"})}),
+    reordered_table_with_new_subsection = Table.ReorderColumns(remove_employee_name_from_header, new_column_order),
+    remove_original_subsection = Table.RemoveColumns(reordered_table_with_new_subsection,{"SUBSECTION"}),
+    
+
+    merge_section_with_subsection = Table.CombineColumns(remove_original_subsection,{"SET_SECTIONS", "SUBSECTION HEADERS"},Combiner.CombineTextByDelimiter(":", QuoteStyle.None),"SECTION:SUBSECTION"),
+    transpose_table_back = Table.Transpose(merge_section_with_subsection),
+    set_first_row_as_header = Table.PromoteHeaders(transpose_table_back, [PromoteAllScalars=true]),
+    hours_earnings_list = List.FindText(Table.ColumnNames(set_first_row_as_header), "HOURS_EARNINGS" ),
+
+    merge_all_hours_earnings = Table.CombineColumns(set_first_row_as_header, hours_earnings_list,Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"HOURS_EARNINGS"),
+    
+    #"Unpivoted Other Columns" = Table.UnpivotOtherColumns(merge_all_hours_earnings, {"EMPLOYEE_PII:EMPLOYEE"}, "Attribute", "Value"),
+    section_subsection_headers = Table.RenameColumns(#"Unpivoted Other Columns",{{"Attribute", "SECTION_SUBSECTION"}, {"Value", "SUBSECTION_VALUE"}}),
+    sort_rows = Table.Sort(section_subsection_headers,{{"SECTION_SUBSECTION", Order.Ascending}}),
+    split_pii = Table.SplitColumn(sort_rows, "EMPLOYEE_PII:EMPLOYEE", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"EMPLOYEE_PII:EMPLOYEE.1", "EMPLOYEE_PII:EMPLOYEE.2", "EMPLOYEE_PII:EMPLOYEE.3", "EMPLOYEE_PII:EMPLOYEE.4", "EMPLOYEE_PII:EMPLOYEE.5"}),
+    split_subsection_values = Table.SplitColumn(split_pii, "SUBSECTION_VALUE", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"SUBSECTION_VALUE.1", "SUBSECTION_VALUE.2", "SUBSECTION_VALUE.3", "SUBSECTION_VALUE.4", "SUBSECTION_VALUE.5", "SUBSECTION_VALUE.6", "SUBSECTION_VALUE.7", "SUBSECTION_VALUE.8", "SUBSECTION_VALUE.9"}),
+    remove_pii_header = Table.RemoveColumns(split_subsection_values,{"EMPLOYEE_PII:EMPLOYEE.1"})
+in
+    remove_pii_header
+
+
+
+
+/*******************************************Works on Page 1 and Page 4 ****************************************************************************/
+let
+    
+    Source = Pdf.Tables(File.Contents("G:\My Drive\BBSI\Paychex Year to Date Report.pdf"), [Implementation="1.3"]),
+    page_table = Source{[Id="Page004"]}[Data],
+
+    // create a table combining employee names with ids that is available in Page 1 of the report 
+    empname_id_table = Source{[Id="Table001"]}[Data],
+    set_headers = Table.PromoteHeaders(empname_id_table, [PromoteAllScalars=true]),
+    merge_first_two = Table.CombineColumns(set_headers,{"EMPLOYEE NAME", "ID"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID"),
+    merge_second_two = Table.CombineColumns(merge_first_two,{"EMPLOYEE NAME_1", "ID_2"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID.1"),
+    merge_third_two = Table.CombineColumns(merge_second_two,{"EMPLOYEE NAME_3", "ID_4"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID.2"),
+    merge_fourth_two = Table.CombineColumns(merge_third_two,{"EMPLOYEE NAME_5", "ID_6"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_NAME_ID.3"),
+    unpivot_all = Table.Unpivot(merge_fourth_two, {"EMPLOYEE_NAME_ID", "EMPLOYEE_NAME_ID.1", "EMPLOYEE_NAME_ID.2", "EMPLOYEE_NAME_ID.3"}, "Attribute", "Value"),
+    separate_empname_id = Table.SplitColumn(unpivot_all, "Value", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"Value.1", "Value.2"}),
+    set_column_header_names = Table.RenameColumns(separate_empname_id,{{"Value.1", "EMPLOYEE_NAME"}, {"Value.2", "ID"}}),
+    empname_id_final = Table.RemoveColumns(set_column_header_names,{"Attribute"}),
+    //Completed creating employee name id mapping
+
+
+    //Begin with top and bottom tables on page
+    clean_nulls = Table.ReplaceValue(page_table,null,"",Replacer.ReplaceValue,{"Column2", "Column4", "Column5", "Column6", "Column7"}),
+    identify_top_table_start = Table.AddColumn(clean_nulls, "IDENTIFY_TOP_TABLE_START", each if Text.Contains([Column4], "HOURS, EARNINGS") then "KEEP FROM HERE" else null),
+    fill_to_identify_top_table = Table.FillDown(identify_top_table_start,{"IDENTIFY_TOP_TABLE_START"}),
+    distinguish_employee_name = Table.AddColumn(fill_to_identify_top_table, "EMPLOYEE NAME", each if Text.Contains([Column2], ",") and Text.Contains([Column4], "ID")  then [Column2] else null),
+    fill_empname_down = Table.FillDown(distinguish_employee_name,{"EMPLOYEE NAME"}),
+    separate_into_top_and_bottom = Table.AddColumn(fill_empname_down, "IDENTIFY_TOP_BOTTOM", each if [EMPLOYEE NAME] is null then "TOPTABLE" else "BOTTOMTABLE"),
+    fill_empname_up = Table.FillUp(separate_into_top_and_bottom,{"EMPLOYEE NAME"}),
+    distinguish_soc_sec = Table.AddColumn(fill_empname_up, "SOCIAL SECURITY", each if Text.Contains([Column2], "Soc Sec#")  then [Column2] else null),
+    fill_social_sec_up = Table.FillUp(distinguish_soc_sec,{"SOCIAL SECURITY"}),
+    fill_social_sec_down = Table.FillDown(fill_social_sec_up,{"SOCIAL SECURITY"}),
+    //Identify the top and bottom halves
+    top_table =  Table.SelectRows(fill_social_sec_down, each ([IDENTIFY_TOP_BOTTOM] = "TOPTABLE")  and ([IDENTIFY_TOP_TABLE_START] = "KEEP FROM HERE")),
+    bottom_table =  Table.SelectRows(fill_social_sec_down, each ([IDENTIFY_TOP_BOTTOM] = "BOTTOMTABLE")),
+   
+    
+    remove_meta_columns = Table.RemoveColumns(top_table,{"IDENTIFY_TOP_BOTTOM",  "IDENTIFY_TOP_TABLE_START"}),
+    fill_check_date_down = Table.FillDown(remove_meta_columns,{"Column1"}),
+    replace_null_with_blanks_for_logical = Table.ReplaceValue(fill_check_date_down,null,"",Replacer.ReplaceValue,{"Column1"}),
+    distinguish_check_empname_rows = Table.AddColumn(replace_null_with_blanks_for_logical, "EMPLOYEE_DETAILS_1", each if Text.Contains([Column1], "CHECK") then "EMPLOYEE" else if Text.Contains([Column1], ",") then [EMPLOYEE NAME] else null),
+    merge_with_master_empnameid = Table.NestedJoin(distinguish_check_empname_rows, {"EMPLOYEE NAME"}, empname_id_final, {"EMPLOYEE_NAME"}, "DETECT_EMPID", JoinKind.LeftOuter),
+    expand_DETECT_EMPID = Table.ExpandTableColumn(merge_with_master_empnameid, "DETECT_EMPID", {"ID"}, {"ID"}),
+    add_emppii_details = Table.AddColumn(expand_DETECT_EMPID, "EMPLOYEE_PII", each "EMPLOYEE_PII_DETAILS"),
+    employee_pii = Table.CombineColumns(add_emppii_details,{"EMPLOYEE_PII", "EMPLOYEE NAME", "SOCIAL SECURITY", "ID"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_PII"),
+    identify_emp_header_rows = Table.FillUp(employee_pii,{"EMPLOYEE_DETAILS_1"}),
+    replace_emp_header_column_with_blanks = Table.ReplaceValue(identify_emp_header_rows,null,"",Replacer.ReplaceValue,{"EMPLOYEE_DETAILS_1"}),
+    create_column_with_header_pii = Table.AddColumn(replace_emp_header_column_with_blanks, "Custom", each if [EMPLOYEE_DETAILS_1] = "EMPLOYEE" then "EMPLOYEE" else [EMPLOYEE_PII]),
+    set_emp_column_header = Table.RenameColumns(create_column_with_header_pii,{{"Custom", "EMPLOYEE"}}),
+    remove_emp_meta_columns = Table.RemoveColumns(set_emp_column_header,{"EMPLOYEE_DETAILS_1", "EMPLOYEE_PII"}),
+    merge_pii_with_dates = Table.CombineColumns(remove_emp_meta_columns,{"EMPLOYEE", "Column1"},Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"EMPLOYEE_CHECKDATE"),
+    make_headers_similar = Table.ReplaceValue(merge_pii_with_dates,"EMPLOYEE|CHECK","EMPLOYEE|",Replacer.ReplaceText,{"EMPLOYEE_CHECKDATE"}),
+    remove_period_total = Table.RemoveLastN(make_headers_similar,2),
+    transpose_table = Table.Transpose(remove_period_total),
+    replace_col2_null_with_blanks = Table.ReplaceValue(transpose_table,null,"",Replacer.ReplaceValue,{"Column1","Column2", "Column3", "Column4"}),
+
+    identify_sections = Table.AddColumn(replace_col2_null_with_blanks, "SET_SECTIONS",
+                                                                                    each if (Text.Contains([Column3], "OTHER") and  Text.Contains([Column4], "PAYMENTS"))
+                                                                                    or (Text.Contains([Column4], "OTHER") and Text.Contains([Colum52], "PAYMENTS"))
+                                                                                    then "HOURS_EARNINGS" 
+                                                                                    else if Text.Contains([Column2], "SOC SEC") or Text.Contains([Column2], "FEDERAL")
+                                                                                    or Text.Contains([Column2], "STATE") or Text.Contains([Column2], "LOCAL")  or Text.Contains([Column2], "OTHER")
+                                                                                    or Text.Contains([Column3], "SOC SEC") or Text.Contains([Column3], "FEDERAL")
+                                                                                    or Text.Contains([Column3], "STATE") or Text.Contains([Column3], "LOCAL")  or Text.Contains([Column3], "OTHER")
+                                                                                    or Text.Contains([Column4], "SOC SEC") or Text.Contains([Column4], "FEDERAL")
+                                                                                    or Text.Contains([Column4], "STATE") or Text.Contains([Column4], "LOCAL")  or Text.Contains([Column4], "OTHER")
+
+                                                                                    then "WITHHOLDINGS" 
+
+                                                                                    else if Text.Contains([Column4], "PX") or Text.Contains([Column4], "TO-PIA") 
+                                                                                         or Text.Contains([Column3], "PX") or Text.Contains([Column3], "TO-PIA") 
+                                                                                         or Text.Contains([Column2], "PX") or Text.Contains([Column2], "TO-PIA") 
+
+                                                                                        then "DEDUCTIONS" 
+                                                                                        
+                                                                                    else if Text.Contains([Column1], "NET") or Text.Contains([Column2], "PAY") 
+                                                                                        or Text.Contains([Column2], "PAY") 
+                                                                                    then "NET PAY ALLOCATIONS"
+                                                                                    else if Text.Contains([Column1], "EMPLOYEE")
+                                                                                    then "EMPLOYEE_PII" 
+
+                                                                                    else null),
+    fill_sections_up = Table.FillUp(identify_sections,{"SET_SECTIONS"}),
+    fill_sections_down = Table.FillDown(fill_sections_up,{"SET_SECTIONS"}),
+
+
+    curr_table_columns = Table.ColumnNames(fill_sections_down),
+    columns_other_than_setsections = List.Difference(curr_table_columns, {"SET_SECTIONS", "Column1"}),
+    final_columns = List.Combine({{"SET_SECTIONS"}, columns_other_than_setsections}),
+    reordered_table = Table.ReorderColumns(fill_sections_down, final_columns),
+    remove_first_column = Table.RemoveColumns(reordered_table,{"Column1"}),
+    merge_subsections = Table.CombineColumns(remove_first_column,{"Column2", "Column3", "Column4"},Combiner.CombineTextByDelimiter(" ", QuoteStyle.None),"SUBSECTION"),
+    
+
+    remove_employee_name_from_header = Table.AddColumn(merge_subsections, "SUBSECTION HEADERS", each if Text.Contains([SUBSECTION], "EMPLOYEE") 
+                                                                                                    then "EMPLOYEE"
+                                                                                                    else [SUBSECTION]),
+
+
+    //Bring the newly created column to the front
+    curr_table_col_list = Table.ColumnNames(remove_employee_name_from_header),
+    new_column_order =   List.Combine({{"SUBSECTION HEADERS"}, List.Difference(curr_table_col_list,{"SUBSECTION HEADERS"})}),
+    reordered_table_with_new_subsection = Table.ReorderColumns(remove_employee_name_from_header, new_column_order),
+    remove_original_subsection = Table.RemoveColumns(reordered_table_with_new_subsection,{"SUBSECTION"}),
+    
+
+    merge_section_with_subsection = Table.CombineColumns(remove_original_subsection,{"SET_SECTIONS", "SUBSECTION HEADERS"},Combiner.CombineTextByDelimiter(":", QuoteStyle.None),"SECTION:SUBSECTION"),
+    transpose_table_back = Table.Transpose(merge_section_with_subsection),
+    set_first_row_as_header = Table.PromoteHeaders(transpose_table_back, [PromoteAllScalars=true]),
+    hours_earnings_list = List.FindText(Table.ColumnNames(set_first_row_as_header), "HOURS_EARNINGS" ),
+
+    merge_all_hours_earnings = Table.CombineColumns(set_first_row_as_header, hours_earnings_list,Combiner.CombineTextByDelimiter("|", QuoteStyle.None),"HOURS_EARNINGS"),
+    
+    #"Unpivoted Other Columns" = Table.UnpivotOtherColumns(merge_all_hours_earnings, {"EMPLOYEE_PII:EMPLOYEE"}, "Attribute", "Value"),
+    section_subsection_headers = Table.RenameColumns(#"Unpivoted Other Columns",{{"Attribute", "SECTION_SUBSECTION"}, {"Value", "SUBSECTION_VALUE"}}),
+    sort_rows = Table.Sort(section_subsection_headers,{{"SECTION_SUBSECTION", Order.Ascending}}),
+    split_pii = Table.SplitColumn(sort_rows, "EMPLOYEE_PII:EMPLOYEE", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"EMPLOYEE_PII:EMPLOYEE.1", "EMPLOYEE_PII:EMPLOYEE.2", "EMPLOYEE_PII:EMPLOYEE.3", "EMPLOYEE_PII:EMPLOYEE.4", "EMPLOYEE_PII:EMPLOYEE.5"}),
+    split_subsection_values = Table.SplitColumn(split_pii, "SUBSECTION_VALUE", Splitter.SplitTextByDelimiter("|", QuoteStyle.None), {"SUBSECTION_VALUE.1", "SUBSECTION_VALUE.2", "SUBSECTION_VALUE.3", "SUBSECTION_VALUE.4", "SUBSECTION_VALUE.5", "SUBSECTION_VALUE.6", "SUBSECTION_VALUE.7", "SUBSECTION_VALUE.8", "SUBSECTION_VALUE.9"}),
+    remove_pii_header = Table.RemoveColumns(split_subsection_values,{"EMPLOYEE_PII:EMPLOYEE.1"})
+in
+    remove_pii_header
