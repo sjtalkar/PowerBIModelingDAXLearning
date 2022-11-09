@@ -377,6 +377,35 @@ RETURN
 vrSmartSum
    
 ```
+
+### SWITCH STATEMENTS , TREATAS AND FIELD PARAMETERS
+
+[Data Goblins](https://data-goblins.com/power-bi/measure-selection)
+Power BI Apps for multiple audiences
+Requirement:
+1.	Manager views departments they control.
+2.	They might not be interested in other departments but there is no harm in viewing data from other departments
+3.	An employee who is not a manager should not be able to view data other than their own.
+4.	Does that mean the Manager views an overall summary and his/her own individual summary?
+
+Is Power BI Apps for multiple audience an option?
+[GuyInACube]https://www.youtube.com/watch?v=nchNa44o2D4
+[Blog Post](https://powerbi.microsoft.com/en-sg/blog/announcing-public-preview-of-multiple-audiences-for-power-bi-apps/)
+
+
+An app is a view into a workspace and allows for wide distribution.
+It is typically recommended that apps be published when distributing to more than 10+ people.
+For less than that set, just give them access to the workspace with appropriate permissions.
+You can Create App in a workspace. For the new experience, in power bi service you  have to 
+upgrade to the new App experience.
+
+You can then add a “group” that can access certain reports. So you have to add people to groups
+That can access certain reports. You can additionally control their permission to build.
+
+
+This might be a combination of which report they can view and also RLS to filter out information that 
+the employee/manager only has access to.
+
    
 
  
